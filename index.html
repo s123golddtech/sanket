@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InterviewPrep — Daily Revision Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--line:#e2e8f0;--text:#0f172a;--mut:#64748b;--acc:#4f46e5;--green:#16a34a;--amber:#d97706;--red:#dc2626;--dark:#0f172a}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Inter","Helvetica Neue",sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45}
+#app{display:flex;min-height:100vh}
+/* ---------- Sidebar ---------- */
+#sidebar{width:238px;background:var(--dark);color:#cbd5e1;position:fixed;inset:0 auto 0 0;height:100vh;display:flex;flex-direction:column;z-index:60;transition:transform .22s}
+.brand{padding:18px 18px 14px;border-bottom:1px solid #1e293b}
+.brand h2{color:#fff;font-size:17px;display:flex;gap:8px;align-items:center}
+.brand .bs{font-size:11.5px;color:#94a3b8;margin-top:3px}
+#nav{padding:10px 10px 0;overflow-y:auto;flex:1}
+.navitem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:#cbd5e1;font-size:14px;font-weight:600;cursor:pointer;user-select:none;margin-bottom:2px;text-decoration:none}
+.navitem:hover{background:#1e293b;color:#fff}
+.navitem.active{background:rgba(99,102,241,.22);color:#fff;box-shadow:inset 3px 0 0 #818cf8}
+.side-foot{padding:12px 18px;border-top:1px solid #1e293b;font-size:11.5px;color:#94a3b8}
+#overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;display:none}
+#overlay.show{display:block}
+/* ---------- Main ---------- */
+#main{margin-left:238px;flex:1;min-width:0;display:flex;flex-direction:column}
+#topbar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:11px 18px;display:flex;align-items:center;gap:12px;z-index:40}
+#burger{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:16px;cursor:pointer}
+#topbar-title{font-weight:700;font-size:16.5px;display:flex;align-items:baseline;gap:10px;min-width:0}
+.tb-date{font-weight:500;font-size:12.5px;color:var(--mut);white-space:nowrap}
+.top-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.streak-chip,.timer-chip{background:#fff7ed;color:#c2410c;font-weight:700;font-size:12.5px;padding:5px 11px;border-radius:99px;border:1px solid #fed7aa;cursor:default;white-space:nowrap}
+.timer-chip{background:#eef2ff;color:#4338ca;border-color:#c7d2fe;cursor:pointer;user-select:none}
+#view{padding:20px 18px 60px;max-width:1100px;width:100%;margin:0 auto}
+/* ---------- Cards / layout ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.05);margin-bottom:14px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.card-h h3{font-size:15.5px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.stat-row{margin-bottom:14px}
+.stat{padding:14px}
+.statlab{font-size:12px;color:var(--mut);font-weight:600}
+.statnum{font-size:23px;font-weight:800;margin-top:2px}
+.statsub{font-size:12px;color:var(--mut);margin-top:2px}
+.page-head{margin-bottom:16px}
+.page-head h1{font-size:24px}
+.page-head .sub{color:var(--mut);font-size:13.5px;margin-top:2px}
+.empty{color:var(--mut);font-size:13.5px;padding:10px 4px}
+.mut{color:var(--mut)}.sm{font-size:12px}
+/* ---------- progress ---------- */
+.pbar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.pbar.slim{height:7px;margin:6px 0 4px}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:99px;transition:width .35s}
+.psmall{font-size:12.5px;color:var(--mut);font-weight:600}
+.ring{--p:0;width:118px;height:118px;border-radius:50%;background:conic-gradient(#4f46e5 calc(var(--p)*1%),#e2e8f0 0);display:flex;align-items:center;justify-content:center;flex:none}
+.ring>div{width:84px;height:84px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-size:22px}.ring span{font-size:11px;color:var(--mut)}
+.hero{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+.hero-l{flex:1;min-width:230px}
+.bigpct{font-size:26px;font-weight:800}
+.hcounts{font-size:13.5px;color:#334155;margin-top:4px}
+.nowline{margin-top:8px;font-size:13.5px;color:var(--mut)}
+.hero-r{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;min-width:250px;flex:1}
+.mini{font-size:12px;color:var(--mut);font-weight:600}
+.mini b{display:block;font-size:16px;color:var(--text)}
+/* ---------- sessions & tasks ---------- */
+.sess.cur{border-color:#a5b4fc;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.sess-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:4px}
+.time-badge{font-variant-numeric:tabular-nums;background:#eef2ff;color:#4338ca;font-weight:700;padding:3px 9px;border-radius:8px;font-size:12px;white-space:nowrap}
+.sess-label{font-weight:700;font-size:14.5px}
+.sess-count{margin-left:auto;font-size:12.5px;color:var(--mut);font-weight:700;background:#f1f5f9;padding:2px 10px;border-radius:99px}
+.now{background:#16a34a;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;vertical-align:middle;margin-left:6px}
+.sess-sub{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.chip{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:2.5px 9px;border-radius:99px;background:#f1f5f9;color:var(--mut);white-space:nowrap}
+.chip.sc{cursor:pointer}
+.chip.ok{background:#dcfce7;color:#15803d}.chip.bad{background:#fee2e2;color:#b91c1c}
+.chip.warn,.chip.weak{background:#fef3c7;color:#b45309}.chip.over{background:#fee2e2;color:#b91c1c}.chip.pri{background:#e0e7ff;color:#4338ca}
+.revdue{border-color:#fde68a}
+.task{display:flex;align-items:flex-start;gap:10px;padding:7px 8px;border-radius:10px}
+.task:hover{background:#f8fafc}
+.task .tbody{flex:1;min-width:0}
+.tt{font-size:14px;font-weight:500;word-wrap:break-word}
+.task.done .tt{color:var(--mut);text-decoration:line-through}
+.task.prog .tt{color:#92400e}
+.tmeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:3px}
+.tnote{font-size:12.5px;color:var(--mut);margin-top:3px;white-space:pre-wrap}
+.tacts{display:flex;gap:2px;opacity:0;transition:opacity .15s}
+.task:hover .tacts,.tacts:focus-within{opacity:1}
+@media(hover:none){.tacts{opacity:.7}}
+.cb{width:23px;height:23px;flex:none;border:2px solid #94a3b8;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#fff;padding:0;margin-top:1px}
+.cb:hover{border-color:var(--acc)}
+.cb.prog{border-color:var(--amber);background:#fef3c7;color:#b45309}
+.cb.done{border-color:var(--green);background:var(--green)}
+.pdot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.pdot.high{background:var(--red)}.pdot.med{background:#eab308}.pdot.low{background:#22c55e}
+.ibtn{border:none;background:transparent;cursor:pointer;font-size:14px;padding:3px 7px;border-radius:7px;color:var(--mut)}
+.ibtn:hover{background:#eef2ff;color:var(--acc)}
+/* ---------- buttons / forms ---------- */
+.btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:7px 14px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+.btn:hover{border-color:#cbd5e1;background:#f8fafc}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff}.btn.primary:hover{background:#4338ca}
+.btn.danger{color:var(--red);border-color:#fecaca}.btn.danger:hover{background:#fef2f2}
+.btn.warn{color:var(--amber);border-color:#fde68a}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--acc)}.btn.ghost:hover{background:#eef2ff}
+.btn.sm{padding:4px 11px;font-size:12.5px;border-radius:8px}
+.in{width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;background:#fff;color:var(--text)}
+.in:focus{outline:2px solid #c7d2fe;border-color:var(--acc)}
+textarea.in{resize:vertical}
+.f{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px}
+.f label{font-size:12px;font-weight:700;color:#475569}
+.row2{display:flex;gap:12px;flex-wrap:wrap}.row3{display:flex;gap:12px;flex-wrap:wrap}
+.ck{display:flex;gap:8px;align-items:center;font-size:13.5px;margin:10px 0;cursor:pointer}
+/* ---------- filter bar / tabs ---------- */
+.filterbar .chips-row{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:6px 0 4px;margin-top:8px}
+.fchip{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:4px 12px;border-radius:99px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--mut)}
+.fchip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.tabbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:6px 13px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;color:var(--mut)}
+.tab.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+/* ---------- topic grids / tables / misc ---------- */
+.topics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px 16px}
+.topics-grid .task{padding:5px 6px}
+.tblwrap{overflow-x:auto;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.qtext{background:#f8fafc;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:12px 14px;font-size:15px;font-weight:600;margin:8px 0}
+.iq{border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:9px}
+.iq.good{border-color:#bbf7d0;background:#f0fdf4}
+.iq.fail{border-color:#fecaca;background:#fef2f2}
+.iq-m{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:5px}
+.iq-a{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.accrow{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13.5px}
+.accrow .pbar{flex:1;margin:0}
+.uprow{display:flex;align-items:center;gap:9px;padding:6px 2px;font-size:13.5px;flex-wrap:wrap}
+.hm{display:grid;grid-template-columns:repeat(15,1fr);gap:4px;margin-top:10px}
+.hmc{height:20px;border-radius:5px;background:#e2e8f0}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:8px}
+.kv b{display:block;font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.kv{font-size:13.5px}
+.sess-edit{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:12px}
+.chips-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sub-chip{--c:#64748b;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;background:#fff;color:var(--mut);cursor:pointer;font-family:inherit}
+.sub-chip.on{background:var(--c);border-color:var(--c);color:#fff}
+.banner{background:linear-gradient(90deg,#eef2ff,#fdf4ff);border:1px solid #c7d2fe}
+/* ---------- modal / toast ---------- */
+.backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto}
+.modal{background:#fff;border-radius:16px;max-width:600px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(15,23,42,.3);margin:auto}
+.modal h3{margin-bottom:14px}
+.mbtns{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark);color:#fff;padding:10px 18px;border-radius:99px;font-size:13.5px;font-weight:600;opacity:0;transition:all .25s;z-index:99;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ---------- responsive ---------- */
+@media(max-width:960px){
+#sidebar{transform:translateX(-100%)}
+#sidebar.open{transform:none}
+#main{margin-left:0}
+#burger{display:block}
+.g4{grid-template-columns:1fr 1fr}
+.topics-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+.g2,.g3,.g4{grid-template-columns:1fr 1fr}
+#view{padding:14px 10px 70px}
+.sess-count{margin-left:0}
+.hero{gap:14px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand"><h2>🎯 InterviewPrep</h2><div class="bs">Daily execution · revision · tracking</div></div>
+    <nav id="nav"></nav>
+    <div class="side-foot" id="side-prog"></div>
+  </aside>
+  <div id="overlay" onclick="toggleSidebar()"></div>
+  <main id="main">
+    <header id="topbar">
+      <button id="burger" onclick="toggleSidebar()">☰</button>
+      <div id="topbar-title"></div>
+      <div class="top-right">
+        <div class="timer-chip" id="tb-timer" onclick="toggleTimer()" title="Study timer">▶ 0m</div>
+        <div class="streak-chip" id="tb-streak">🔥 0</div>
+      </div>
+    </header>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* =====================================================================
+   1. UTILITIES
+===================================================================== */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KEY='interviewPrep_v1';
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function uid(){return Math.random().toString(36).slice(2,10);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function addDays(s,n){const d=parseDate(s);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dayNum(s){return Math.round(parseDate(s).getTime()/86400000);}
+function niceDate(s){return parseDate(s).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});}
+function longDate(s){return parseDate(s).toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+function nowMin(){const d=new Date();return d.getHours()*60+d.getMinutes();}
+function fmtMin(m){let h=Math.floor(m/60)%24,mm=m%60;const ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(mm).padStart(2,'0')+' '+ap;}
+function minToInput(m){const h=Math.floor(m/60)%24,mm=m%60;return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0');}
+function parseTime(v){if(!v)return 0;const[a,b]=v.split(':').map(Number);return (a||0)*60+(b||0);}
+function fmtSec(s){s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+'h '+m+'m':m+'m';}
+function lastNDays(n){return[...Array(n)].map((_,i)=>addDays(todayStr(),-(n-1-i)));}
+function weekDates(){const t=parseDate(todayStr());const dow=(t.getDay()+6)%7;const mon=addDays(todayStr(),-dow);return[...Array(7)].map((_,i)=>addDays(mon,i));}
+function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;$('#toast-root').appendChild(el);setTimeout(()=>el.classList.add('show'),10);setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300);},2800);}
+function openModal(html){$('#modal-root').innerHTML='<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal">'+html+'</div></div>';}
+function closeModal(){$('#modal-root').innerHTML='';}
+function stat(lab,val,sub){return '<div class="card stat"><div class="statlab">'+lab+'</div><div class="statnum">'+val+'</div>'+(sub?'<div class="statsub">'+sub+'</div>':'')+'</div>';}
+function pageHead(t,s){return '<div class="page-head"><h1>'+t+'</h1>'+(s?'<div class="sub">'+s+'</div>':'')+'</div>';}
+function chip(subj){return '<span class="chip" style="background:'+subj.color+'1a;color:'+subj.color+'">'+subj.name+'</span>';}
+
+/* =====================================================================
+   2. CONSTANTS — subjects, topic lists, schedule, question pools
+===================================================================== */
+const STAGES=[1,3,7,14,30];
+const DEFAULT_SCHEDULE=[
+ {id:'s1',start:600,end:720,label:'DSA + LeetCode',subjects:['dsa']},
+ {id:'s2',start:780,end:900,label:'Java / OOP / Spring Boot',subjects:['java','git']},
+ {id:'s3',start:900,end:1020,label:'AWS + Linux + Networking + OS',subjects:['aws','linux','networks','os']},
+ {id:'s4',start:1050,end:1140,label:'Aptitude',subjects:['aptitude']},
+ {id:'s5',start:1140,end:1230,label:'SQL + DBMS + SE + Testing',subjects:['sql','se','testing']},
+ {id:'s6',start:1290,end:1350,label:'Project Revision',subjects:['projects','sysdesign']},
+ {id:'s7',start:1350,end:1395,label:'Communication + HR + Interview',subjects:['communication','interview']},
+ {id:'s8',start:1395,end:1440,label:'Daily Revision + Mistake Review',subjects:['revision']}
+];
+const SUBJECTS={
+ dsa:{name:'DSA',color:'#6366f1',page:'dsa',tpd:2,
+  lists:[{id:'c',name:'DSA Concepts',topics:['Arrays','Strings','Linked List','Stack','Queue','HashMap / HashSet','Recursion','Backtracking','Binary Search','Sorting','Sliding Window','Two Pointer','Prefix Sum','Greedy','Trees','BST','Heap / Priority Queue','Graph','BFS','DFS','Dynamic Programming','Trie']}],
+  daily:[{k:'easy',f:s=>'Solve '+(s.dailyTargets.easy||1)+' Easy LeetCode problem'+((s.dailyTargets.easy||1)>1?'s':'')},
+   {k:'medium',f:s=>'Solve '+(s.dailyTargets.medium||1)+' Medium LeetCode problem'+((s.dailyTargets.medium||1)>1?'s':'')},
+   {k:'revise',t:'Revise one previously solved problem'},
+   {t:'Analyze time & space complexity of today\u2019s problems'},
+   {t:'Write the approach first — without looking at solutions'}]},
+ java:{name:'Java',color:'#d97706',page:'java',tpd:3,
+  lists:[
+   {id:'core',name:'Core Java',topics:['Variables & Data Types','Operators','Loops','Methods','Arrays','Strings','StringBuilder / StringBuffer','Exception Handling','Collections Framework','List','Set','Map','Queue','Stack','Generics','File Handling','Java 8 Features','Lambda Expressions','Streams','Functional Interfaces','Multithreading','Threads','Synchronization','JVM / JDK / JRE','Garbage Collection']},
+   {id:'oop',name:'OOP',topics:['Class & Object','Encapsulation','Inheritance','Polymorphism','Abstraction','Interface','Abstract Class','Method Overloading','Method Overriding','Constructor','final / static / this / super']},
+   {id:'spring',name:'Spring Boot / REST API',topics:['Spring Boot basics & starters','@RestController & request mapping','Dependency Injection','REST API design & CRUD','Spring Data JPA basics','Validation','Global exception handling (@ControllerAdvice)','Spring Security & JWT basics','Profiles & application.properties','Actuator & health checks','Microservices basics']}],
+  daily:[{t:'Revise 5 Java interview questions'},{t:'Explain one Java concept verbally'},{t:'Write one Java coding problem without assistance'},{t:'Revise 3 Spring Boot / REST API concepts'}]},
+ aws:{name:'AWS / Cloud',color:'#f97316',page:'aws',tpd:1,
+  lists:[{id:'c',name:'AWS Services & Concepts',topics:['AWS Regions & Availability Zones','IAM','EC2','AMI','Security Groups','S3','EBS','VPC','Subnets','Internet Gateway','Load Balancer','Auto Scaling','RDS','CloudWatch','Lambda basics','Route 53 basics','AWS CLI basics']}],
+  daily:[{t:'Revise 3 AWS concepts'},{t:'Answer 5 AWS interview questions'},{t:'Explain one AWS architecture verbally (EC2 + ALB + ASG + RDS)'}]},
+ aptitude:{name:'Aptitude',color:'#eab308',page:'aptitude',tpd:1,
+  lists:[
+   {id:'q',name:'Quantitative Aptitude',topics:['Percentages','Profit & Loss','Ratio & Proportion','Average','Time & Work','Time Speed Distance','Simple Interest','Compound Interest','Probability','Permutation & Combination','Number System','LCM / HCF','Ages','Mixtures','Data Interpretation']},
+   {id:'l',name:'Logical Reasoning',topics:['Series','Coding-Decoding','Blood Relations','Direction Sense','Seating Arrangement','Syllogism','Puzzles','Statement & Conclusion','Data Sufficiency']},
+   {id:'v',name:'Verbal',topics:['Grammar','Vocabulary','Reading Comprehension','Sentence Correction','Para Jumbles','Synonyms / Antonyms']}],
+  daily:[{k:'quant',f:s=>(s.dailyTargets.quant||15)+' Quantitative questions'},
+   {k:'logical',f:s=>(s.dailyTargets.logical||10)+' Logical Reasoning questions'},
+   {k:'verbal',f:s=>(s.dailyTargets.verbal||10)+' Verbal questions'},
+   {t:'Review aptitude mistakes & note weak topics'}]},
+ sql:{name:'SQL / DBMS',color:'#10b981',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'SQL / DBMS',topics:['SELECT','WHERE','GROUP BY','HAVING','ORDER BY','JOINs','INNER JOIN','LEFT JOIN','RIGHT JOIN','Subqueries','Aggregate Functions','Primary Key','Foreign Key','Normalization','ACID','Transactions','Indexing','Views','Stored Procedures','MySQL','PostgreSQL','MongoDB basics']}],
+  daily:[{k:'sqlq',f:s=>'Solve '+(s.dailyTargets.sqlQ||3)+' SQL questions'},{t:'Write queries without looking at syntax'},{t:'Explain one DBMS concept verbally'}]},
+ linux:{name:'Linux',color:'#64748b',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Linux Commands & Concepts',topics:['pwd','ls','cd','mkdir','touch','cp','mv','rm','cat','grep','find','chmod','chown','ps','top','kill','df','du','free','ping','curl','wget','ssh','Environment Variables','Processes','Services','Pipes','Redirection']}],
+  daily:[{t:'Practice 5 Linux commands'},{t:'Solve 2 Linux interview questions'}]},
+ os:{name:'Operating Systems',color:'#8b5cf6',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Operating Systems',topics:['Process','Thread','Process vs Thread','Context Switching','CPU Scheduling','FCFS','SJF','Round Robin','Priority Scheduling','Synchronization','Mutex','Semaphore','Deadlock','Deadlock Prevention','Deadlock Avoidance','Memory Management','Paging','Segmentation','Virtual Memory','Page Replacement','File Systems']}],
+  daily:[{t:'Revise 2 OS concepts'},{t:'Answer 3 OS interview questions'}]},
+ networks:{name:'Computer Networks',color:'#06b6d4',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Computer Networks',topics:['OSI Model','TCP/IP Model','TCP','UDP','HTTP','HTTPS','DNS','DHCP','IP Address','IPv4','IPv6','MAC Address','ARP','Routing','Switching','Ports','Socket','Firewall','SSL/TLS','REST API','HTTP Methods','HTTP Status Codes']}],
+  daily:[{t:'Revise 2 networking concepts'},{t:'Answer 3 networking interview questions'}]},
+ se:{name:'Software Engineering',color:'#ec4899',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Software Engineering',topics:['SDLC','Waterfall','Agile','Scrum','Sprint','User Stories','Requirements','Functional Requirements','Non-functional Requirements','UML','Design Principles','SOLID','Coupling','Cohesion','Version Control','Git','GitHub','CI/CD basics']}],
+  daily:[{t:'Revise 2 Software Engineering concepts'},{t:'Answer 2 SE interview questions'}]},
+ testing:{name:'Software Testing',color:'#f43f5e',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Software Testing',topics:['Software Testing Fundamentals','Manual Testing','Automation Testing basics','Unit Testing','Integration Testing','System Testing','Regression Testing','Smoke Testing','Sanity Testing','Black Box Testing','White Box Testing','Test Case','Test Scenario','Bug / Defect','Severity','Priority','SDLC vs STLC']}],
+  daily:[{t:'Write 3 test cases'},{t:'Revise 2 testing concepts'},{t:'Answer 2 testing interview questions'}]},
+ git:{name:'Git / GitHub',color:'#f59e0b',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Git / GitHub',topics:['Git setup & config','clone / add / commit','remote, push & pull','Branching','Merging & conflict resolution','Pull requests & code review','git log / git diff','reset / revert / stash','.gitignore','Fork vs clone','GitHub workflow & README']}],
+  daily:[{t:'Practice 2 Git commands / operations'},{t:'Revise 1 Git concept'}]},
+ sysdesign:{name:'System Design',color:'#84cc16',page:'corecs',tpd:1,
+  lists:[{id:'c',name:'Basic System Design',topics:['Scalability: vertical vs horizontal','Load balancing','Caching','Database replication & sharding','CAP theorem basics','Monolith vs microservices','REST design principles','Rate limiting','Message queues','CDN basics','Design a URL shortener','Design a basic chat system']}],
+  daily:[{t:'Revise 1 System Design concept'},{t:'Sketch or read one simple system design'}]},
+ projects:{name:'Projects',color:'#14b8a6',page:'projects',tpd:0,lists:[],
+  daily:[{t:'Explain project in 30 seconds'},{t:'Explain project architecture'},{t:'Practice 2 project interview questions'},{t:'Explain one challenge & how you solved it'}]},
+ communication:{name:'Communication',color:'#a855f7',page:'communication',tpd:0,lists:[],
+  daily:[{t:'Tell me about yourself'},{t:'Explain my project aloud'},{t:'Explain one technical concept verbally'},{t:'Explain one DSA problem verbally'},{t:'Practice one HR question'},{t:'Practice one situational question'},{t:'Practice a group discussion topic'},{t:'2-minute speaking exercise'},{t:'Practice the answer aloud (or record it)'}]},
+ interview:{name:'Interview',color:'#ef4444',page:'interview',tpd:0,lists:[],
+  daily:[{k:'tech',f:s=>'Answer '+(s.dailyTargets.techQ||5)+' technical interview questions'},
+   {k:'project',f:s=>'Answer '+(s.dailyTargets.projectQ||2)+' project interview questions'},
+   {k:'hr',f:s=>'Answer '+(s.dailyTargets.hrQ||2)+' HR questions'},
+   {k:'intro',t:'Self-introduction practice (1 minute)'}]},
+ revision:{name:'Revision',color:'#0891b2',page:'revision',tpd:0,lists:[],
+  daily:[{k:'dailyrev',t:'Daily Revision — fill the end-of-day review'},{t:'Review today\u2019s mistakes'},{t:'Plan tomorrow\u2019s priorities'}]}
+};
+const TECH_CATS=['java','oop','dsa','sql','dbms','os','networks','aws','linux','se','testing'];
+const CAT_NAME={java:'Java',oop:'OOP',dsa:'DSA',sql:'SQL',dbms:'DBMS',os:'OS',networks:'Networks',aws:'AWS',linux:'Linux',se:'SE',testing:'Testing',project:'Project',hr:'HR',comm:'Comm'};
+const CAT_SUBJECT={java:'java',oop:'java',dsa:'dsa',sql:'sql',dbms:'sql',os:'os',networks:'networks',aws:'aws',linux:'linux',se:'se',testing:'testing',project:'projects',hr:'communication'};
+const MUST_KNOW=['OOP','DSA','Java','Collections','Exception Handling','Multithreading','SQL','DBMS','OS','Networking','HTTP / REST','Git','Linux','AWS','Software Engineering','Testing','Project Architecture','Authentication / JWT','Spring Boot','Microservices basics','Basic System Design','Communication','HR Questions'];
+const REVIEW_QS=['What did I learn today?','What did I forget?','What mistakes did I make?','Which DSA problem was difficult?','Which aptitude topic was weak?','Which interview question could I not answer?','What should I revise tomorrow?'];
+const PROJECT_FIELDS=[['problem','Problem Statement'],['why','Why I built it'],['role','My role'],['tech','Technologies used'],['arch','Architecture'],['db','Database'],['apis','APIs'],['auth','Authentication'],['feat','Important features'],['chal','Challenges'],['bugs','Bugs encountered'],['solved','How I solved them'],['future','Future improvements']];
+const POOL={
+java:['What is the difference between JDK, JRE and JVM?','Why is Java platform independent?','What is the difference between ArrayList and LinkedList? When would you use each?','HashMap vs Hashtable vs ConcurrentHashMap?','What is the difference between == and .equals()?','Explain the exception hierarchy. Checked vs unchecked exceptions.','What is the difference between final, finally and finalize?','How does Garbage Collection work? Can you force it?','String vs StringBuilder vs StringBuffer?','What are Java 8 Streams? What are their advantages?','Method overloading vs overriding?','What is a functional interface?','How does a HashMap work internally (hashing, buckets)?','What is the volatile keyword?','Explain the equals() / hashCode() contract.'],
+oop:['What are the four pillars of OOP? Explain each briefly.','Abstraction vs encapsulation — what is the difference?','Interface vs abstract class — when to use which?','Can we override a static method? Why not?','What is constructor chaining?','Why does Java not support multiple inheritance (diamond problem)?','Compile-time polymorphism vs runtime polymorphism?','What is the super keyword used for?','What are default and static methods in interfaces (Java 8+)?','What is the difference between an inner class and a lambda?'],
+dsa:['What is the difference between an Array and a Linked List?','Average and worst-case time complexity of HashMap operations?','Explain binary search and its complexity.','BFS vs DFS — when would you use each?','Explain the two-pointer technique with an example.','What is a heap? Where is it used?','Difference between Stack and Queue?','What is dynamic programming? Top-down vs bottom-up?','How would you detect a cycle in a linked list?','What is a trie and when is it useful?','Explain the sliding window technique with an example.','How does quicksort work? What is its worst-case complexity?'],
+sql:['WHERE vs HAVING — what is the difference?','Explain the types of JOINs. What does a LEFT JOIN return?','Primary key vs unique key?','Write a query to find the second highest salary.','What is normalization? Explain 1NF, 2NF, 3NF.','What are the ACID properties?','DELETE vs TRUNCATE vs DROP?','What is an index? Its advantages and disadvantages?'],
+dbms:['What is a transaction?','What is a view? Can a view be updated?','Clustered vs non-clustered index?','What is a stored procedure? What are its benefits?','Correlated vs non-correlated subquery?','When is denormalization useful?'],
+os:['What is the difference between a process and a thread?','What is context switching?','What is a deadlock? Explain its four necessary conditions.','Mutex vs semaphore?','What is virtual memory?','Paging vs segmentation?','What is thrashing?','How does Round Robin scheduling work?','What is a critical section?','What is a zombie process?'],
+networks:['Explain the OSI model and its layers.','TCP vs UDP — differences and use cases?','What happens when you type a URL in the browser and press Enter?','HTTP vs HTTPS?','What is DNS and how does resolution work?','What is DHCP?','What do HTTP status codes 200, 301, 404 and 500 mean?','What is ARP?','What is a socket?','What makes an API RESTful?','GET vs POST — differences?'],
+aws:['What are AWS Regions and Availability Zones?','What is IAM? Users vs roles?','EC2 — stop vs terminate?','What are S3 storage classes?','Security Groups vs NACLs?','What is a VPC? Public vs private subnet?','How does a Load Balancer improve availability?','What is Auto Scaling?','What is CloudWatch used for?','RDS vs a self-managed database on EC2?'],
+linux:['What is the difference between grep, find and locate?','What does chmod 755 mean?','How do you check running processes and kill one?','What is the difference between kill and kill -9?','How do you check disk usage?','Explain pipes and redirection with examples.','How do you view the last 20 lines of a file?','How do you set an environment variable permanently?'],
+se:['Waterfall vs Agile — when would you use each?','What happens in a Sprint?','What are functional vs non-functional requirements?','Explain the SOLID principles.','What is coupling vs cohesion?','What is CI/CD?','What are user stories?','Git vs GitHub? Merge vs rebase?'],
+testing:['Verification vs validation?','Explain levels of testing: unit, integration, system.','Smoke vs sanity testing?','What is regression testing?','Black box vs white box testing?','Severity vs priority — give an example of high severity but low priority.','What does a test case contain?','What is the difference between SDLC and STLC?'],
+project:['Explain your project in 30 seconds.','What was the most difficult bug you faced and how did you solve it?','Why did you choose this tech stack?','How did you design the database for your project?','Explain the architecture of your project.','How is authentication handled in your project?','What future improvements would you make?','If the load increased 10x, what would break first and how would you fix it?','What was your exact role in the team?'],
+hr:['Tell me about yourself.','Why should we hire you?','What are your strengths and weaknesses?','Where do you see yourself in 5 years?','Why do you want to work at our company?','Describe a time you failed and what you learned from it.','How do you handle pressure and deadlines?','Are you willing to relocate?','What are your salary expectations as a fresher?','Do you have any questions for us?','Describe a challenging team situation and how you handled it.'],
+comm:['Tell me about yourself.','Explain your project to a non-technical person.','Explain what an API is, in simple words.','Explain the difference between a process and a thread, aloud.','Explain how HTTP works, aloud.','Describe one of your strengths with a real example.','Describe a time you worked under pressure.','Explain your favourite data structure and why you like it.','Summarize what you learned today in 60 seconds.','Explain OOP inheritance as if teaching a junior.','Why should we hire you?','Describe a bug you fixed and how you found it.','Explain what the cloud is to a beginner.','Talk about a technology you want to learn and why.','Explain SQL joins using a real-life analogy.']
+};
+
+/* =====================================================================
+   3. STATE (persisted in localStorage)
+===================================================================== */
+let state;
+function defaultState(){return{version:1,meta:{welcomed:false},
+ settings:{name:'',streakThreshold:0.5,weakTopicsPerDay:2,schedule:JSON.parse(JSON.stringify(DEFAULT_SCHEDULE)),
+  dailyTargets:{easy:1,medium:1,quant:15,logical:10,verbal:10,techQ:5,projectQ:2,hrQ:2,sqlQ:3}},
+ days:{},topicStatus:{},revisionQueue:[],weakTopics:[],dsaProblems:[],projects:[],
+ interviewLog:[],interviewRotation:{},commAnswers:[],mustKnow:{},
+ timer:{running:false,startAt:null,date:null}};}
+function load(){try{const raw=localStorage.getItem(KEY);
+ if(raw){const d=JSON.parse(raw);const def=defaultState();state=Object.assign(def,d);
+  state.settings=Object.assign(defaultState().settings,d.settings||{});
+  state.meta=Object.assign({welcomed:false},d.meta||{});}
+ else state=defaultState();
+}catch(e){state=defaultState();}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+function mkTask(o){return Object.assign({id:uid(),type:'daily',kind:null,title:'',subject:null,session:'',status:'todo',priority:'med',notes:'',topicKey:null,weakId:null},o);}
+
+/* =====================================================================
+   4. DAILY GENERATION (checklist + rotating interview questions)
+===================================================================== */
+function pickTopics(sid,D){const subj=SUBJECTS[sid];const all=[];
+ subj.lists.forEach(l=>l.topics.forEach((t,i)=>{const key=sid+':'+l.id+':'+i;
+  if(((state.topicStatus[key]||{}).status||'todo')!=='done')all.push({title:t,key:key});}));
+ if(!all.length)return[];
+ const n=Math.min(subj.tpd||1,all.length),st=dayNum(D)%all.length,out=[];
+ for(let k=0;k<n;k++)out.push(all[(st+k)%all.length]);
+ return out;}
+
+function generateDayTasks(D){
+ const s=state.settings,tasks=[],dn=dayNum(D);
+ s.schedule.forEach(sess=>{(sess.subjects||[]).forEach(sid=>{const subj=SUBJECTS[sid];if(!subj)return;
+  (subj.daily||[]).forEach(it=>{const title=it.f?it.f(s):(it.t||'');
+   tasks.push(mkTask({type:'daily',kind:it.k||null,title:title,subject:sid,session:sess.id}));});
+  if(subj.lists&&subj.lists.length)pickTopics(sid,D).forEach(tp=>
+   tasks.push(mkTask({type:'topic',title:tp.title,subject:sid,session:sess.id,topicKey:tp.key})));});});
+ // bring weak topics back into the day (rotating, if not practiced in last 3 days)
+ const wl=state.weakTopics.filter(w=>!w.resolved&&(!w.lastPracticed||dn-dayNum(w.lastPracticed)>=3));
+ if(wl.length){const st=dn%wl.length,n=Math.min(s.weakTopicsPerDay||2,wl.length);
+  for(let k=0;k<n;k++){const w=wl[(st+k)%wl.length];
+   const sess=s.schedule.find(x=>x.subjects&&x.subjects.includes(w.subject))||s.schedule[s.schedule.length-1];
+   tasks.push(mkTask({type:'weak',title:'Focus (weak): '+w.topic,subject:w.subject||'revision',session:sess?sess.id:'',weakId:w.id}));}}
+ return tasks;}
+
+function nextQ(cat){const pool=POOL[cat]||[];if(!pool.length)return '—';
+ let r=state.interviewRotation[cat];
+ if(!r||r.ptr>=r.order.length){r={order:shuffle(pool.map((_,i)=>i)),ptr:0};state.interviewRotation[cat]=r;}
+ return pool[r.order[r.ptr++]];}
+
+function generateDayInterview(D,day){day=day||state.days[D];if(!day)return;
+ if(day.interview&&day.interview.length)return;
+ const tg=state.settings.dailyTargets,dn=dayNum(D),items=[];
+ for(let k=0;k<Math.max(1,tg.techQ||5);k++){const cat=TECH_CATS[(dn*2+k)%TECH_CATS.length];
+  items.push({id:uid(),cat:cat,text:nextQ(cat),status:'todo',answer:''});}
+ for(let k=0;k<Math.max(0,tg.projectQ||2);k++)items.push({id:uid(),cat:'project',text:nextQ('project'),status:'todo',answer:''});
+ for(let k=0;k<Math.max(0,tg.hrQ||2);k++)items.push({id:uid(),cat:'hr',text:nextQ('hr'),status:'todo',answer:''});
+ day.interview=items;}
+
+function getDay(D){let day=state.days[D];
+ if(!day){day={tasks:generateDayTasks(D),aptitude:null,review:null,interview:[],studySeconds:0};state.days[D]=day;}
+ if(!day.interview)generateDayInterview(D,day);
+ return day;}
+
+/* =====================================================================
+   5. STATS — day / streak / weekly / monthly
+===================================================================== */
+function dueRevisions(){const t=dayNum(todayStr());
+ return state.revisionQueue.filter(q=>!q.done&&dayNum(q.dueDate)<=t).sort((a,b)=>a.dueDate<b.dueDate?-1:1);}
+function dayStats(D){const dd=state.days[D];let total=0,done=0;
+ if(dd){total=dd.tasks.length;done=dd.tasks.filter(t=>t.status==='done').length;}
+ const rv=state.revisionQueue.filter(q=>q.lastCompleted===D).length;total+=rv;done+=rv;
+ if(D===todayStr())total+=dueRevisions().length;
+ return{total:total,done:done,remaining:Math.max(0,total-done),pct:total?Math.round(done/total*100):0};}
+function qualifiesDay(D){const st=dayStats(D);return st.total>=5&&st.done/st.total>=state.settings.streakThreshold;}
+function currentStreak(){let n=0,d=todayStr();
+ if(!qualifiesDay(d))d=addDays(d,-1);
+ while(qualifiesDay(d)){n++;d=addDays(d,-1);}return n;}
+function bestStreak(){const dates=Object.keys(state.days).filter(qualifiesDay).sort();
+ let best=0,run=0,prev=null;
+ for(const d of dates){run=(prev&&dayNum(d)===dayNum(prev)+1)?run+1:1;best=Math.max(best,run);prev=d;}
+ return Math.max(best,currentStreak());}
+function periodCompletion(n){let t=0,d=0;lastNDays(n).forEach(D=>{const st=dayStats(D);t+=st.total;d+=st.done;});
+ return{done:d,total:t,pct:t?Math.round(d/t*100):0};}
+function subjectProgress(subj){let total=0,done=0;
+ subj.lists.forEach(l=>{total+=l.topics.length;l.topics.forEach((_,i)=>{
+  if(((state.topicStatus[subj.id+':'+l.id+':'+i]||{}).status||'todo')==='done')done++;});});
+ return{total:total,done:done,pct:total?Math.round(done/total*100):0};}
+function weeklyReview(){const dates=weekDates();let tasksDone=0,tasksTotal=0,studySec=0;const subjStat={};
+ dates.forEach(D=>{const dd=state.days[D];if(!dd)return;studySec+=dd.studySeconds||0;
+  dd.tasks.forEach(t=>{tasksTotal++;if(t.status==='done')tasksDone++;
+   const s=t.subject||'other';(subjStat[s]=subjStat[s]||{d:0,t:0}).t++;if(t.status==='done')subjStat[s].d++;});});
+ const probs=state.dsaProblems.filter(p=>dates.includes(p.date)).length;
+ let aptA=0,aptC=0;
+ dates.forEach(D=>{const a=(state.days[D]||{}).aptitude;if(a)['quant','logical','verbal'].forEach(k=>{aptA+=(a[k]&&a[k].att)||0;aptC+=(a[k]&&a[k].cor)||0;});});
+ const iqs=state.interviewLog.filter(l=>dates.includes(l.date)).length;
+ const comm=state.commAnswers.filter(c=>dates.includes(c.date)).length;
+ const revs=state.revisionQueue.filter(q=>dates.includes(q.lastCompleted)).length;
+ const topics=Object.values(state.topicStatus).filter(v=>v.status==='done'&&dates.includes(v.date)).length;
+ const strong=[],weak=[];
+ Object.entries(subjStat).forEach(([s,st])=>{if(st.t<3)return;const pct=st.d/st.t;
+  const nm=(SUBJECTS[s]||{}).name||s;
+  if(pct>=0.8)strong.push(nm);else if(pct<0.5)weak.push(nm+' ('+Math.round(pct*100)+'%)');});
+ const nextWeek=[...new Set([...state.weakTopics.filter(w=>!w.resolved).map(w=>w.topic),
+  ...dueRevisions().slice(0,8).map(q=>q.topic)])].slice(0,12);
+ return{tasksDone:tasksDone,tasksTotal:tasksTotal,probs:probs,aptA:aptA,aptC:aptC,iqs:iqs,comm:comm,revs:revs,topics:topics,studySec:studySec,strong:strong,weak:weak,nextWeek:nextWeek};}
+
+/* =====================================================================
+   6. REVISION QUEUE & WEAK TOPICS (spaced repetition)
+===================================================================== */
+function enqueueRevision(subject,topic,key){
+ if(key&&state.revisionQueue.some(q=>!q.done&&q.key===key))return;
+ state.revisionQueue.push({id:uid(),subject:subject||'revision',topic:topic,key:key||('k:'+uid()),stage:0,dueDate:addDays(todayStr(),STAGES[0]),created:todayStr(),lastCompleted:null,done:false});}
+function setQueueFor(key,subject,topic,date){let q=state.revisionQueue.find(x=>!x.done&&x.key===key);
+ if(!date){if(q)state.revisionQueue=state.revisionQueue.filter(x=>x!==q);return;}
+ if(q)q.dueDate=date;else state.revisionQueue.push({id:uid(),subject:subject||'revision',topic:topic,key:key,stage:0,dueDate:date,created:todayStr(),lastCompleted:null,done:false});}
+function dequeue(key){state.revisionQueue=state.revisionQueue.filter(q=>q.done||q.key!==key);}
+function completeRevision(id){const q=state.revisionQueue.find(x=>x.id===id);if(!q)return;
+ q.lastCompleted=todayStr();q.stage=(q.stage||0)+1;
+ if(q.stage>=STAGES.length){q.done=true;toast('🎉 Mastered: '+q.topic+' (all 5 revisions complete)');}
+ else{q.dueDate=addDays(todayStr(),STAGES[q.stage]);toast('🔁 '+q.topic+' — next revision '+niceDate(q.dueDate));}
+ save();render();}
+function snoozeRevision(id){const q=state.revisionQueue.find(x=>x.id===id);if(!q)return;
+ q.dueDate=addDays(todayStr(),1);save();render();toast('⏭ Moved to tomorrow');}
+function addWeak(subject,topic,reason){
+ if(state.weakTopics.some(w=>!w.resolved&&w.topic===topic))return false;
+ state.weakTopics.push({id:uid(),subject:subject||'revision',topic:topic,reason:reason||'',addedDate:todayStr(),hits:0,lastPracticed:null,resolved:false});
+ return true;}
+function resolveWeak(id){const w=state.weakTopics.find(x=>x.id===id);if(!w)return;
+ w.resolved=true;save();render();toast('✅ Weak topic resolved — great job!');}
+function weakSubjects(){return[...new Set(state.weakTopics.filter(w=>!w.resolved).map(w=>w.subject))];}
+
+/* =====================================================================
+   7. TASK ACTIONS (tri-state, add/edit/delete/move, priorities, notes)
+===================================================================== */
+function findTask(id){for(const ds in state.days){const t=state.days[ds].tasks.find(t=>t.id===id);if(t)return{date:ds,t:t};}return null;}
+function topicFromKey(key){const p=key.split(':');const subj=SUBJECTS[p[0]];const list=subj.lists.find(l=>l.id===p[1]);
+ return{subj:subj,list:list,i:+p[2],title:list.topics[+p[2]]};}
+function onTaskDone(date,t){
+ if(t.type==='topic'&&t.topicKey){const tf=topicFromKey(t.topicKey);
+  const cur=(state.topicStatus[t.topicKey]||{}).status||'todo';
+  if(cur!=='done'){state.topicStatus[t.topicKey]={status:'done',date:date};
+   enqueueRevision(t.subject,tf.title,t.topicKey);
+   toast('✅ '+tf.title+' — revisions scheduled (1, 3, 7, 14, 30 days)');}}
+ if(t.type==='weak'&&t.weakId){const w=state.weakTopics.find(x=>x.id===t.weakId);
+  if(w){w.hits=(w.hits||0)+1;w.lastPracticed=date;}}}
+function onTaskUndone(t){
+ if(t.type==='topic'&&t.topicKey){const cur=state.topicStatus[t.topicKey];
+  if(cur&&cur.status==='done'){state.topicStatus[t.topicKey]={status:'prog'};dequeue(t.topicKey);}}}
+function setTaskStatus(date,t,st){const prev=t.status;t.status=st;
+ if(st==='done'&&prev!=='done')onTaskDone(date,t);
+ else if(prev==='done'&&st!=='done')onTaskUndone(t);
+ save();render();}
+function cycleTask(id,e){if(e)e.stopPropagation();const f=findTask(id);if(!f)return;
+ const order=['todo','prog','done'];const nx=order[(order.indexOf(f.t.status)+1)%3];
+ setTaskStatus(f.date,f.t,nx);}
+function deleteTask(id){const f=findTask(id);if(!f)return;
+ if(!confirm('Delete this task?'))return;
+ state.days[f.date].tasks=state.days[f.date].tasks.filter(t=>t.id!==id);
+ setQueueFor('task:'+id,null,'','');
+ save();render();}
+function cycleTopic(key){const cur=(state.topicStatus[key]||{}).status||'todo';
+ if(cur==='todo')state.topicStatus[key]={status:'prog'};
+ else if(cur==='prog'){state.topicStatus[key]={status:'done',date:todayStr()};
+  const tf=topicFromKey(key);enqueueRevision(tf.subj.id,tf.title,key);toast('✅ '+tf.title+' — revisions scheduled');
+  const day=getDay(todayStr());day.tasks.forEach(t=>{if(t.topicKey===key)t.status='done';});}
+ else{state.topicStatus[key]={status:'todo'};dequeue(key);
+  const day=getDay(todayStr());day.tasks.forEach(t=>{if(t.topicKey===key)t.status='todo';});}
+ save();render();}
+function cycleMust(i){const cur=(state.mustKnow[i]||{}).status||'todo';
+ const nx=cur==='todo'?'prog':cur==='prog'?'done':'todo';
+ state.mustKnow[i]={status:nx};save();render();}
+
+/* ---- task modal (add / edit) ---- */
+let tmCtx=null;
+function sessionOptions(sel){return '<option value=""'+(sel===''?' selected':'')+'>No session (Other)</option>'+
+ state.settings.schedule.map(s=>'<option value="'+s.id+'"'+(sel===s.id?' selected':'')+'>'+fmtMin(s.start)+'–'+fmtMin(s.end)+' · '+esc(s.label)+'</option>').join('');}
+function openTaskModal(id,sessId){tmCtx={id:id||null,sessId:sessId||''};
+ const f=id?findTask(id):null;const t=f?f.t:{title:'',notes:'',priority:'med',status:'todo',subject:null,session:sessId||''};
+ const revQ=state.revisionQueue.find(q=>!q.done&&q.key==='task:'+id);
+ openModal('<h3>'+(id?'Edit task':'Add task')+'</h3>'
+ +'<div class="f"><label>Title *</label><input id="m-title" class="in" value="'+esc(t.title)+'"></div>'
+ +'<div class="row3">'
+ +'<div class="f"><label>Status</label><select id="m-status" class="in"><option value="todo"'+(t.status==='todo'?' selected':'')+'>Not started</option><option value="prog"'+(t.status==='prog'?' selected':'')+'>In progress</option><option value="done"'+(t.status==='done'?' selected':'')+'>Completed</option></select></div>'
+ +'<div class="f"><label>Priority</label><select id="m-pri" class="in"><option value="high"'+(t.priority==='high'?' selected':'')+'>🔴 High</option><option value="med"'+(t.priority==='med'?' selected':'')+'>🟡 Medium</option><option value="low"'+(t.priority==='low'?' selected':'')+'>🟢 Low</option></select></div>'
+ +'<div class="f"><label>Session</label><select id="m-sess" class="in">'+sessionOptions(t.session)+'</select></div></div>'
+ +'<div class="f"><label>Subject</label><select id="m-subj" class="in"><option value="">— none —</option>'
+ +Object.entries(SUBJECTS).map(([k,v])=>'<option value="'+k+'"'+(t.subject===k?' selected':'')+'>'+v.name+'</option>').join('')+'</select></div>'
+ +'<div class="f"><label>Notes</label><textarea id="m-notes" class="in" rows="3">'+esc(t.notes||'')+'</textarea></div>'
+ +'<div class="f"><label>Set revision date (adds to spaced revision queue)</label><input type="date" id="m-rev" class="in" value="'+(revQ?revQ.dueDate:'')+'"></div>'
+ +'<div class="mbtns">'+(id?'<button class="btn danger" onclick="deleteTask(\''+id+'\');closeModal()">Delete</button>':'')
+ +'<button class="btn ghost" onclick="closeModal()">Cancel</button>'
+ +'<button class="btn primary" onclick="saveTaskModal()">Save</button></div>');}
+function saveTaskModal(){const title=$('#m-title').value.trim();
+ if(!title){toast('Title is required');return;}
+ const sess=$('#m-sess').value,pri=$('#m-pri').value,notes=$('#m-notes').value.trim(),
+  subj=$('#m-subj').value||null,rev=$('#m-rev').value;
+ if(tmCtx.id){const f=findTask(tmCtx.id);if(!f)return;const t=f.t;const prev=t.status;
+  Object.assign(t,{title:title,notes:notes,priority:pri,session:sess,subject:subj});
+  const st=$('#m-status').value;t.status=st;
+  if(st==='done'&&prev!=='done')onTaskDone(f.date,t);
+  else if(prev==='done'&&st!=='done')onTaskUndone(t);
+  setQueueFor('task:'+t.id,t.subject||'revision',title,rev);}
+ else{const t=mkTask({type:'custom',title:title,notes:notes,priority:pri,session:sess,subject:subj});
+  getDay(todayStr()).tasks.push(t);
+  if(rev)setQueueFor('task:'+t.id,subj||'revision',title,rev);}
+ save();closeModal();render();toast('💾 Task saved');}
+
+/* =====================================================================
+   8. DSA PROBLEM HISTORY
+===================================================================== */
+let prCtx=null,phFilter={q:'',diff:'all',st:'all'};
+function openProblemModal(id){prCtx=id||null;
+ let p={name:'',lc:'',diff:'Easy',topic:'Arrays',status:'Solved',time:'',mistake:'',understood:true,revisit:''};
+ if(id){p=state.dsaProblems.find(x=>x.id===id)||p;}
+ const topics=SUBJECTS.dsa.lists[0].topics;
+ openModal('<h3>'+(id?'Edit':'Log')+' DSA problem</h3>'
+ +'<div class="row2"><div class="f"><label>Problem name *</label><input id="pr-name" class="in" value="'+esc(p.name)+'" placeholder="Two Sum"></div>'
+ +'<div class="f"><label>LeetCode #</label><input id="pr-lc" class="in" value="'+esc(p.lc||'')+'"></div></div>'
+ +'<div class="row3">'
+ +'<div class="f"><label>Difficulty</label><select id="pr-diff" class="in">'+['Easy','Medium','Hard'].map(d=>'<option'+(p.diff===d?' selected':'')+'>'+d+'</option>').join('')+'</select></div>'
+ +'<div class="f"><label>Topic</label><select id="pr-topic" class="in">'+topics.map(t=>'<option'+(p.topic===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'
+ +'<div class="f"><label>Status</label><select id="pr-status" class="in">'+['Solved','Attempted','Stuck','Revised'].map(s=>'<option'+(p.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select></div></div>'
+ +'<div class="row2"><div class="f"><label>Time taken (min)</label><input id="pr-time" type="number" min="0" class="in" value="'+(p.time||'')+'"></div>'
+ +'<div class="f"><label>Revisit date</label><input id="pr-rev" type="date" class="in" value="'+(p.revisit||'')+'"></div></div>'
+ +'<div class="f"><label>Mistake made / what tripped you up</label><textarea id="pr-mistake" class="in" rows="2">'+esc(p.mistake||'')+'</textarea></div>'
+ +'<label class="ck"><input type="checkbox" id="pr-und"'+(p.understood?' checked':'')+'> Solution understood</label>'
+ +'<div class="mbtns">'+(id?'<button class="btn danger" onclick="deleteProblem()">Delete</button>':'')
+ +'<button class="btn ghost" onclick="closeModal()">Cancel</button>'
+ +'<button class="btn primary" onclick="saveProblem()">Save</button></div>');}
+function saveProblem(){const g=x=>($('#'+x)?$('#'+x).value.trim():'');
+ const name=g('pr-name');if(!name){toast('Problem name required');return;}
+ const p={id:prCtx||uid(),date:todayStr(),name:name,lc:g('pr-lc'),diff:$('#pr-diff').value,
+  topic:$('#pr-topic').value,status:$('#pr-status').value,time:+g('pr-time')||0,
+  mistake:g('pr-mistake'),understood:$('#pr-und').checked,revisit:g('pr-rev')};
+ if(prCtx){const i=state.dsaProblems.findIndex(x=>x.id===prCtx);p.date=state.dsaProblems[i].date;state.dsaProblems[i]=p;}
+ else state.dsaProblems.push(p);
+ if(p.date===todayStr()&&(!p.understood||p.mistake||p.status!=='Solved')){
+  addWeak('dsa',name+(p.mistake?' — '+p.mistake:''),'problem log');
+  if(!p.revisit)p.revisit=addDays(todayStr(),1);}
+ setQueueFor('p:'+p.id,'dsa',name+(p.lc?' (LC '+p.lc+')':''),p.revisit);
+ syncDsaTasks(todayStr());save();closeModal();render();toast('🧩 Problem saved');}
+function deleteProblem(){if(!prCtx)return;if(!confirm('Delete this problem?'))return;
+ state.dsaProblems=state.dsaProblems.filter(x=>x.id!==prCtx);
+ setQueueFor('p:'+prCtx,null,'','');
+ save();closeModal();render();toast('Problem deleted');}
+function syncDsaTasks(D){const day=state.days[D];if(!day)return;
+ const tg=state.settings.dailyTargets,probs=state.dsaProblems.filter(p=>p.date===D);
+ const ok=p=>p.status==='Solved'||p.status==='Revised';
+ const easy=probs.filter(p=>p.diff==='Easy'&&ok(p)).length,
+  med=probs.filter(p=>p.diff==='Medium'&&ok(p)).length,
+  rev=probs.filter(p=>p.status==='Revised').length;
+ day.tasks.forEach(t=>{if(t.subject!=='dsa')return;
+  if(t.kind==='easy'&&easy>=(tg.easy||1))t.status='done';
+  if(t.kind==='medium'&&med>=(tg.medium||1))t.status='done';
+  if(t.kind==='revise'&&rev>=1)t.status='done';});}
+function filterProblems(){phFilter.q=($('#ph-q')?$('#ph-q').value:'').toLowerCase();
+ phFilter.diff=$('#ph-diff').value;phFilter.st=$('#ph-st').value;
+ $('#ph-body').innerHTML=problemTable();}
+function problemTable(){const D=todayStr();
+ const probs=[...state.dsaProblems].reverse().filter(p=>{
+  if(phFilter.diff!=='all'&&p.diff!==phFilter.diff)return false;
+  if(phFilter.st!=='all'&&p.status!==phFilter.st)return false;
+  if(phFilter.q&&!(p.name.toLowerCase().includes(phFilter.q)||(p.topic||'').toLowerCase().includes(phFilter.q)||(p.mistake||'').toLowerCase().includes(phFilter.q)))return false;
+  return true;});
+ if(!probs.length)return '<div class="empty">No problems logged yet — add your first one!</div>';
+ return '<div class="tblwrap"><table><thead><tr><th>Problem</th><th>Diff</th><th>Topic</th><th>Status</th><th>Time</th><th>Understood</th><th>Revisit</th><th></th></tr></thead><tbody>'
+ +probs.slice(0,200).map(p=>{const q=state.revisionQueue.find(x=>!x.done&&x.key==='p:'+p.id);
+  const due=q&&dayNum(q.dueDate)<=dayNum(D);
+  return '<tr><td><b>'+esc(p.name)+'</b>'+(p.lc?' <span class="mut">#'+esc(p.lc)+'</span>':'')
+  +(p.mistake?'<div class="mut sm">'+esc(p.mistake)+'</div>':'')
+  +'<div class="mut sm">'+niceDate(p.date)+'</div></td>'
+  +'<td><span class="chip '+(p.diff==='Easy'?'ok':p.diff==='Medium'?'warn':'bad')+'">'+p.diff+'</span></td>'
+  +'<td>'+esc(p.topic||'')+'</td><td>'+esc(p.status)+'</td><td>'+(p.time||'–')+'m</td><td>'+(p.understood?'✅':'❌')+'</td>'
+  +'<td>'+(q?niceDate(q.dueDate)+(due?' <span class="chip over">due</span>':''):'–')+'</td>'
+  +'<td><button class="ibtn" onclick="openProblemModal(\''+p.id+'\')">✎</button></td></tr>';}).join('')
+  +'</tbody></table></div>';}
+
+/* =====================================================================
+   9. APTITUDE TRACKING
+===================================================================== */
+const APT_CATS=[['quant','Quantitative'],['logical','Logical Reasoning'],['verbal','Verbal']];
+function captureAptitude(){const day=getDay(todayStr());
+ const v=id=>($('#'+x2(id))?+$('#'+x2(id)).value||0:0);function x2(x){return x;}
+ day.aptitude={quant:{att:iv('ap-quant-att'),cor:iv('ap-quant-cor'),time:iv('ap-quant-time')},
+  logical:{att:iv('ap-logical-att'),cor:iv('ap-logical-cor'),time:iv('ap-logical-time')},
+  verbal:{att:iv('ap-verbal-att'),cor:iv('ap-verbal-cor'),time:iv('ap-verbal-time')},
+  weak:($('#ap-weak')?$('#ap-weak').value:'').trim()};
+ function iv(id){const el=$('#'+id);return el?(+el.value||0):0;}}
+function saveAptitude(){captureAptitude();const D=todayStr();const a=getDay(D).aptitude;
+ let flagged=0;
+ APT_CATS.forEach(([k,nm])=>{const c=a[k];if(c.att>=5&&c.cor/c.att<0.6){
+  if(addWeak('aptitude',nm+' — accuracy '+Math.round(c.cor/c.att*100)+'%','below 60%'))flagged++;}});
+ if(a.weak&&addWeak('aptitude',a.weak,'self-reported'))flagged++;
+ syncAptTasks(D);save();render();
+ toast('🧮 Log saved'+(flagged?' — '+flagged+' weak topic(s) flagged':''));}
+function syncAptTasks(D){const day=state.days[D];if(!day||!day.aptitude)return;
+ const tg=state.settings.dailyTargets,a=day.aptitude;
+ day.tasks.forEach(t=>{if(t.subject!=='aptitude')return;
+  if(t.kind==='quant'&&(a.quant.att||0)>=tg.quant)t.status='done';
+  if(t.kind==='logical'&&(a.logical.att||0)>=tg.logical)t.status='done';
+  if(t.kind==='verbal'&&(a.verbal.att||0)>=tg.verbal)t.status='done';});}
+
+/* =====================================================================
+   10. INTERVIEW QUESTION ENGINE + COMMUNICATION + PROJECTS
+===================================================================== */
+let iqCtx=null;
+function openAnswer(iid){iqCtx=iid;const day=getDay(todayStr());
+ const it=day.interview.find(x=>x.id===iid);if(!it)return;
+ openModal('<h3>🎤 '+(CAT_NAME[it.cat]||'Interview')+' question</h3>'
+ +'<div class="qtext">'+esc(it.text)+'</div>'
+ +'<div class="f"><label>Your answer (type it the way you would say it)</label><textarea id="ia-text" class="in" rows="8">'+esc(it.answer||'')+'</textarea></div>'
+ +'<div class="mbtns"><button class="btn ghost" onclick="closeModal()">Cancel</button>'
+ +'<button class="btn warn" onclick="markInterview(\'fail\')">Couldn\u2019t answer</button>'
+ +'<button class="btn primary" onclick="markInterview(\'good\')">Save &amp; mark answered</button></div>');}
+function markInterviewDirect(iid){iqCtx=iid;markInterview('fail');}
+function markInterview(result){const D=todayStr();const day=getDay(D);
+ const it=day.interview.find(x=>x.id===iqCtx);if(!it)return;
+ const ans=$('#ia-text')?$('#ia-text').value.trim():'';
+ it.answer=ans;it.status=result;
+ state.interviewLog.push({id:uid(),date:D,cat:it.cat,text:it.text,answer:ans,result:result});
+ if(result==='good')toast('✅ Logged — keep it up!');
+ else{const subj=CAT_SUBJECT[it.cat]||'revision';
+  addWeak(subj,it.text,'couldn\u2019t answer in interview practice');
+  enqueueRevision(subj,it.text,'iq:'+it.id);
+  toast('📌 Added to weak topics & revision queue');}
+ syncInterviewTasks(D);save();closeModal();render();}
+function syncInterviewTasks(D){const day=state.days[D];if(!day)return;
+ const tg=state.settings.dailyTargets,logs=state.interviewLog.filter(l=>l.date===D);
+ const tech=logs.filter(l=>TECH_CATS.includes(l.cat)).length,
+  proj=logs.filter(l=>l.cat==='project').length,hr=logs.filter(l=>l.cat==='hr').length;
+ day.tasks.forEach(t=>{if(t.subject!=='interview')return;
+  if(t.kind==='tech'&&tech>=(tg.techQ||5))t.status='done';
+  if(t.kind==='project'&&proj>=(tg.projectQ||2))t.status='done';
+  if(t.kind==='hr'&&hr>=(tg.hrQ||2))t.status='done';});}
+function openLogView(id){const l=state.interviewLog.find(x=>x.id===id);if(!l)return;
+ openModal('<h3>'+(CAT_NAME[l.cat]||'')+' · '+(l.result==='good'?'✅ answered':'❌ missed')+'</h3>'
+ +'<div class="qtext">'+esc(l.text)+'</div><div class="mut sm">'+niceDate(l.date)+'</div>'
+ +'<div class="f" style="margin-top:10px"><label>Your answer</label><textarea class="in" rows="8" readonly>'+esc(l.answer||'—')+'</textarea></div>'
+ +'<div class="mbtns"><button class="btn primary" onclick="closeModal()">Close</button></div>');}
+
+/* ---- Communication speaking mode ---- */
+let smQ=null,smDraft='';
+function newCommQ(){smQ=nextQ('comm');smDraft='';
+ const el=$('#sm-q');if(el)el.textContent=smQ;
+ const t=$('#sm-text');if(t)t.value='';}
+function saveCommAnswer(){const el=$('#sm-text');const txt=el?el.value.trim():'';
+ if(!txt){toast('Type your answer first ✍️');return;}
+ state.commAnswers.push({id:uid(),date:todayStr(),q:smQ,text:txt});
+ save();toast('🎤 Saved! Now say it out loud once.');newCommQ();render();}
+function openCommView(id){const c=state.commAnswers.find(x=>x.id===id);if(!c)return;
+ openModal('<h3>💬 Saved answer</h3><div class="qtext">'+esc(c.q)+'</div><div class="mut sm">'+niceDate(c.date)+'</div>'
+ +'<div class="f" style="margin-top:10px"><textarea class="in" rows="8" readonly>'+esc(c.text)+'</textarea></div>'
+ +'<div class="mbtns"><button class="btn primary" onclick="closeModal()">Close</button></div>');}
+
+/* ---- Projects ---- */
+let pjCtx=null,pmState=null;
+function openProjectModal(id){pjCtx=id||null;
+ let p={name:'',problem:'',why:'',role:'',tech:'',arch:'',db:'',apis:'',auth:'',feat:'',chal:'',bugs:'',solved:'',future:''};
+ if(id)p=state.projects.find(x=>x.id===id)||p;
+ const F=[['name','Project name *','pf-name',1],['problem','Problem Statement','pf-problem',2],['why','Why I built it','pf-why',2],
+  ['role','My role','pf-role',1],['tech','Technologies used','pf-tech',1],['arch','Architecture','pf-arch',2],
+  ['db','Database','pf-db',1],['apis','APIs','pf-apis',2],['auth','Authentication','pf-auth',1],
+  ['feat','Important features','pf-feat',2],['chal','Challenges','pf-chal',2],['bugs','Bugs encountered','pf-bugs',2],
+  ['solved','How I solved them','pf-solved',2],['future','Future improvements','pf-future',2]];
+ let h='<h3>'+(id?'Edit':'Add')+' project</h3>';
+ F.forEach(([k,lab,el,rows])=>{h+='<div class="f"><label>'+lab+'</label>'
+  +(rows===1?'<input id="'+el+'" class="in" value="'+esc(p[k]||'')+'">':'<textarea id="'+el+'" class="in" rows="2">'+esc(p[k]||'')+'</textarea>')+'</div>';});
+ openModal(h+'<div class="mbtns">'+(id?'<button class="btn danger" onclick="deleteProject()">Delete</button>':'')
+  +'<button class="btn ghost" onclick="closeModal()">Cancel</button>'
+  +'<button class="btn primary" onclick="saveProject()">Save</button></div>');}
+function saveProject(){const name=$('#pf-name').value.trim();
+ if(!name){toast('Project name required');return;}
+ const p={id:pjCtx||uid()};
+ [['name','pf-name'],['problem','pf-problem'],['why','pf-why'],['role','pf-role'],['tech','pf-tech'],
+  ['arch','pf-arch'],['db','pf-db'],['apis','pf-apis'],['auth','pf-auth'],['feat','pf-feat'],
+  ['chal','pf-chal'],['bugs','pf-bugs'],['solved','pf-solved'],['future','pf-future']]
+  .forEach(([k,el])=>p[k]=$('#'+el).value.trim());
+ if(pjCtx){const i=state.projects.findIndex(x=>x.id===pjCtx);state.projects[i]=p;}
+ else state.projects.push(p);
+ save();closeModal();render();toast('💾 Project saved');}
+function deleteProject(){if(!pjCtx)return;if(!confirm('Delete this project?'))return;
+ state.projects=state.projects.filter(x=>x.id!==pjCtx);save();closeModal();render();toast('Project deleted');}
+function projectQuestion(p){const gen=['Explain your project \u201C'+p.name+'\u201D in 30 seconds.',
+ 'Why did you build \u201C'+p.name+'\u201D?','What was your role in \u201C'+p.name+'\u201D?',
+ 'Explain the architecture of \u201C'+p.name+'\u201D.','How is the database designed in \u201C'+p.name+'\u201D?',
+ 'Explain the API flow in \u201C'+p.name+'\u201D.','How is authentication handled in \u201C'+p.name+'\u201D?',
+ 'What technologies did you use in \u201C'+p.name+'\u201D and why?',
+ 'What was the toughest challenge in \u201C'+p.name+'\u201D and how did you solve it?',
+ 'What future improvements would you make to \u201C'+p.name+'\u201D?'];
+ const pool=gen.concat(POOL.project);
+ return pool[Math.floor(Math.random()*pool.length)];}
+function openProjectMode(){if(!state.projects.length){toast('Add a project first');return;}
+ pmState={count:0};pmNext();openModal(pmBody());}
+function pmNext(){pmState.cur={p:state.projects[Math.floor(Math.random()*state.projects.length)]};
+ pmState.cur.q=projectQuestion(pmState.cur.p);}
+function pmBody(){const c=pmState.cur;
+ return '<h3>💼 Project Interview Mode</h3><div class="qtext">'+esc(c.q)+'</div>'
+ +'<div class="mut sm" style="margin-bottom:8px">Project: <b>'+esc(c.p.name)+'</b></div>'
+ +'<div class="f"><label>Answer as you would speak it</label><textarea id="pm-ans" class="in" rows="6"></textarea></div>'
+ +'<div class="mbtns"><button class="btn ghost" onclick="pmNext();modalRefresh()">Next question</button>'
+ +'<button class="btn primary" onclick="pmSave()">Save answer</button>'
+ +'<button class="btn" onclick="closeModal()">Done</button></div>'
+ +'<div class="mut sm" style="margin-top:10px">Answered this session: '+pmState.count+'</div>';}
+function modalRefresh(){$('.modal').innerHTML=pmBody();}
+function pmSave(){const ans=$('#pm-ans')?$('#pm-ans').value.trim():'';
+ state.interviewLog.push({id:uid(),date:todayStr(),cat:'project',
+  text:'['+pmState.cur.p.name+'] '+pmState.cur.q,answer:ans,result:'good'});
+ pmState.count++;syncInterviewTasks(todayStr());save();
+ pmNext();modalRefresh();toast('Saved ✅');}
+
+/* =====================================================================
+   11. END-OF-DAY REVIEW
+===================================================================== */
+function ensureReview(D){const day=getDay(D);
+ if(!day.review)day.review={checks:Array(REVIEW_QS.length).fill(false),learned:'',mistakes:'',tomorrow:''};
+ return day.review;}
+function captureReview(){const rv=ensureReview(todayStr());
+ ['learned','mistakes','tomorrow'].forEach(k=>{const el=$('#rv-'+k);if(el)rv[k]=el.value;});
+ return rv;}
+function toggleReviewCheck(i){const rv=captureReview();rv.checks[i]=!rv.checks[i];save();render();}
+function saveReview(){const D=todayStr();const rv=captureReview();
+ let weakAdded=0;
+ rv.mistakes.split('\n').map(s=>s.trim()).filter(Boolean).forEach(line=>{
+  if(addWeak('revision',line,'daily review'))weakAdded++;});
+ const tmDay=getDay(addDays(D,1));let priAdded=0;
+ const firstSess=(state.settings.schedule[0]||{}).id||'';
+ rv.tomorrow.split('\n').map(s=>s.trim()).filter(Boolean).forEach(line=>{
+  tmDay.tasks.push(mkTask({type:'priority',title:line,subject:'revision',session:firstSess}));priAdded++;});
+ getDay(D).tasks.forEach(t=>{if(t.kind==='dailyrev')t.status='done';});
+ save();render();
+ toast('Saved ✅ '+(weakAdded?weakAdded+' weak topic(s) added. ':'')+(priAdded?priAdded+' task(s) planned for tomorrow.':''));}
+function addWeakManual(){const topic=$('#wk-topic').value.trim();
+ if(!topic){toast('Enter a weak topic');return;}
+ addWeak($('#wk-subj').value,topic,'manually added');save();render();toast('⚠ Weak topic added');}
+
+/* =====================================================================
+   12. STUDY TIMER
+===================================================================== */
+let timerInt=null;
+function flushTimer(){const t=state.timer;
+ if(t.running&&t.startAt){const day=getDay(t.date||todayStr());
+  day.studySeconds=(day.studySeconds||0)+Math.floor((Date.now()-t.startAt)/1000);
+  t.startAt=Date.now();}}
+function toggleTimer(){const t=state.timer;
+ if(t.running){flushTimer();t.running=false;clearInterval(timerInt);toast('⏸ Study timer paused');}
+ else{t.running=true;t.startAt=Date.now();t.date=todayStr();getDay(todayStr());
+  timerInt=setInterval(renderHeader,1000);toast('▶ Study timer running');}
+ save();renderHeader();}
+function studySecondsToday(){const d=state.days[todayStr()];
+ return(d&&d.studySeconds||0)+(state.timer.running&&state.timer.date===todayStr()?Math.floor((Date.now()-state.timer.startAt)/1000):0);}
+function addStudyTime(){const m=prompt('Add extra study minutes for today:','30');if(m===null)return;
+ const n=parseInt(m,10);if(!n||n<0)return;
+ const day=getDay(todayStr());day.studySeconds=(day.studySeconds||0)+n*60;
+ save();render();toast('⏱ '+n+'m added');}
+
+/* =====================================================================
+   13. SHARED RENDER HELPERS
+===================================================================== */
+function taskRow(t){const subj=t.subject?SUBJECTS[t.subject]:null;
+ const pd=t.priority==='high'?'<span class="pdot high" title="High priority"></span>':t.priority==='low'?'<span class="pdot low" title="Low priority"></span>':'<span class="pdot med" title="Medium priority"></span>';
+ return '<div class="task '+t.status+'">'
+ +'<button class="cb '+t.status+'" onclick="cycleTask(\''+t.id+'\',event)" title="Not started → In progress → Completed">'+(t.status==='done'?'✓':t.status==='prog'?'✎':'')+'</button>'
+ +'<div class="tbody"><div class="tt">'+esc(t.title)
+ +(t.type==='priority'?' <span class="chip pri">⭐ priority</span>':'')
+ +(t.type==='weak'?' <span class="chip weak">weak</span>':'')+'</div>'
+ +'<div class="tmeta">'+(subj?chip(subj):'')+pd
+ +(t.kind==='dailyrev'?' <span class="chip">review</span>':'')+'</div>'
+ +(t.notes?'<div class="tnote">'+esc(t.notes)+'</div>':'')+'</div>'
+ +'<div class="tacts"><button class="ibtn" title="Edit" onclick="openTaskModal(\''+t.id+'\')">✎</button>'
+ +'<button class="ibtn" title="Delete" onclick="deleteTask(\''+t.id+'\')">✕</button></div></div>';}
+function topicRow(subjId,listId,i,title){const key=subjId+':'+listId+':'+i;
+ const st=(state.topicStatus[key]||{}).status||'todo';
+ const q=state.revisionQueue.find(x=>!x.done&&x.key===key);
+ const doneAt=st==='done'&&state.topicStatus[key]?state.topicStatus[key].date:null;
+ return '<div class="task '+st+'">'
+ +'<button class="cb '+st+'" onclick="cycleTopic(\''+key+'\')" title="Not started → In progress → Completed">'+(st==='done'?'✓':st==='prog'?'✎':'')+'</button>'
+ +'<div class="tbody"><div class="tt">'+esc(title)+'</div>'
+ +'<div class="tmeta">'+(doneAt?'<span class="chip ok">done '+niceDate(doneAt)+'</span>':'')
+ +(q?'<span class="chip">🔄 next '+niceDate(q.dueDate)+'</span>':'')+'</div></div></div>';}
+function listCard(subj,list){const total=list.topics.length;let done=0;
+ list.topics.forEach((_,i)=>{if(((state.topicStatus[subj.id+':'+list.id+':'+i]||{}).status||'todo')==='done')done++;});
+ const pct=total?Math.round(done/total*100):0;
+ return '<div class="card"><div class="card-h"><h3>'+esc(list.name)+'</h3><span class="psmall">'+done+'/'+total+' · '+pct+'%</span></div>'
+ +'<div class="pbar slim"><i style="width:'+pct+'%"></i></div>'
+ +'<div class="topics-grid">'+list.topics.map((t,i)=>topicRow(subj.id,list.id,i,t)).join('')+'</div></div>';}
+function revisionRow(q){const subj=SUBJECTS[q.subject];const over=dayNum(q.dueDate)<dayNum(todayStr());
+ return '<div class="task"><button class="cb todo" title="Mark revised" onclick="completeRevision(\''+q.id+'\')"></button>'
+ +'<div class="tbody"><div class="tt">🔄 '+esc(q.topic)+'</div>'
+ +'<div class="tmeta">'+(subj?chip(subj):'')+'<span class="chip">rev '+(q.stage+1)+'/5</span>'
+ +(over?'<span class="chip over">overdue</span>':'')+'</div></div>'
+ +'<div class="tacts"><button class="ibtn" title="Postpone to tomorrow" onclick="snoozeRevision(\''+q.id+'\')">⏭</button></div></div>';}
+function nowLineHTML(){const si=sessionInfo();
+ if(si.cur)return '<b>Now:</b> '+fmtMin(si.cur.start)+'–'+fmtMin(si.cur.end)+' · '+esc(si.cur.label);
+ if(si.next)return '<b>Now:</b> Break / free time — next session '+fmtMin(si.next.start)+' ('+esc(si.next.label)+')';
+ return 'All sessions done — time to rest 🌙';}
+function sessionInfo(){const m=nowMin();
+ const sc=[...state.settings.schedule].sort((a,b)=>a.start-b.start);
+ return{cur:sc.find(s=>s.start<=m&&m<s.end),next:sc.find(s=>s.start>m)};}
+function sessionCard(s,tasks,noTime){const done=tasks.filter(t=>t.status==='done').length;
+ const cur=!noTime&&s.start!=null&&s.start<=nowMin()&&nowMin()<s.end;
+ const subs=[...new Set(tasks.map(t=>t.subject).filter(Boolean))];
+ const chips=subs.map(sid=>{const sj=SUBJECTS[sid];return sj?'<span class="chip sc" style="background:'+sj.color+'1a;color:'+sj.color+'" onclick="navigate(\''+sj.page+'\')">'+sj.name+'</span>':'';}).join('');
+ const links=[];
+ if(subs.includes('interview'))links.push('<button class="btn sm ghost" onclick="navigate(\'interview\')">🎤 Interview Mode</button>');
+ if(subs.includes('communication'))links.push('<button class="btn sm ghost" onclick="navigate(\'communication\')">💬 Speaking Mode</button>');
+ if(subs.includes('projects'))links.push('<button class="btn sm ghost" onclick="navigate(\'projects\')">💼 Project Interview Mode</button>');
+ if(subs.includes('revision'))links.push('<button class="btn sm ghost" onclick="navigate(\'revision\')">📝 End-of-day review</button>');
+ if(subs.includes('dsa'))links.push('<button class="btn sm ghost" onclick="openProblemModal()">➕ Log DSA problem</button>');
+ return '<div class="card sess'+(cur?' cur':'')+'">'
+ +'<div class="sess-head">'+(noTime?'':'<span class="time-badge">'+fmtMin(s.start)+' – '+fmtMin(s.end)+'</span>')
+ +'<span class="sess-label">'+esc(s.label)+(cur?'<span class="now">NOW</span>':'')+'</span>'
+ +'<span class="sess-count">'+done+'/'+tasks.length+'</span>'
+ +'<button class="btn sm ghost" onclick="openTaskModal(null,\''+(s.id||'')+'\')">＋ Add</button></div>'
+ +(chips||links.length?'<div class="sess-sub">'+chips+links.join('')+'</div>':'')
+ +(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No tasks here — add one above.</div>')+'</div>';}
+
+/* =====================================================================
+   14. VIEWS
+===================================================================== */
+const VIEW_META={dashboard:['📊','Dashboard'],today:['☀️','Today'],dsa:['🧩','DSA'],java:['☕','Java'],
+ aws:['☁️','AWS / Cloud'],aptitude:['🧮','Aptitude'],corecs:['🖥️','Core CS'],projects:['💼','Projects'],
+ interview:['🎤','Interview'],communication:['💬','Communication'],revision:['🔁','Revision'],
+ progress:['📈','Progress'],settings:['⚙️','Settings']};
+const NAV=[['today','☀️','Today'],['dashboard','📊','Dashboard'],['dsa','🧩','DSA'],['java','☕','Java'],
+ ['aws','☁️','AWS'],['aptitude','🧮','Aptitude'],['corecs','🖥️','Core CS'],['projects','💼','Projects'],
+ ['interview','🎤','Interview'],['communication','💬','Communication'],['revision','🔁','Revision'],
+ ['progress','📈','Progress'],['settings','⚙️','Settings']];
+
+/* ---------- Dashboard ---------- */
+function viewDashboard(){const D=todayStr();const st=dayStats(D);
+ const probs=state.dsaProblems.filter(p=>p.date===D&&(p.status==='Solved'||p.status==='Revised')).length;
+ const apt=(getDay(D).aptitude||{quant:{},logical:{},verbal:{}});
+ const aptAtt=(apt.quant.att||0)+(apt.logical.att||0)+(apt.verbal.att||0);
+ const aptCor=(apt.quant.cor||0)+(apt.logical.cor||0)+(apt.verbal.cor||0);
+ const iq=state.interviewLog.filter(l=>l.date===D).length;
+ const wk=periodCompletion(7),mo=periodCompletion(30),si=sessionInfo(),due=dueRevisions();
+ const wkCons=weekDates().filter(qualifiesDay).length;
+ const isSun=new Date().getDay()===0;
+ let h=pageHead('Hi'+(state.settings.name?', '+esc(state.settings.name):'')+' 👋',longDate(D));
+ h+='<div class="card hero"><div class="hero-l">'
+ +'<div class="ring" style="--p:'+st.pct+'"><div><b>'+st.pct+'%</b><span>today</span></div></div>'
+ +'<div style="margin-top:10px" class="bigpct">Today\u2019s Progress: '+st.pct+'%</div>'
+ +'<div class="hcounts">☑ '+st.done+' Completed &nbsp;·&nbsp; □ '+st.remaining+' Remaining &nbsp;·&nbsp; '+st.total+' total</div>'
+ +'<div class="pbar"><i style="width:'+st.pct+'%"></i></div>'
+ +'<div class="nowline" id="now-line">'+nowLineHTML()+'</div>'
+ +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'
+ +'<button class="btn primary" onclick="navigate(\'today\')">✅ Open Today\u2019s checklist</button>'
+ +'<button class="btn" onclick="navigate(\'interview\')">🎤 Interview Mode</button>'
+ +'<button class="btn" onclick="openProblemModal()">➕ Log DSA problem</button></div></div>'
+ +'<div class="hero-r">'
+ +'<div class="mini">⏱ Study time<b>'+fmtSec(studySecondsToday())+'</b></div>'
+ +'<div class="mini">🧩 Problems solved<b>'+probs+'</b></div>'
+ +'<div class="mini">🧮 Aptitude questions<b>'+aptAtt+'</b></div>'
+ +'<div class="mini">🎤 Interview Qs revised<b>'+iq+'</b></div>'
+ +'</div></div>';
+ h+='<div class="grid g4 stat-row">'
+ +stat('🔥 Current streak',currentStreak()+' day'+(currentStreak()===1?'':'s'),'best: '+bestStreak()+' days')
+ +stat('📅 Weekly completion',wk.pct+'%',wk.done+'/'+wk.total+' tasks (7d)')
+ +stat('🗓 Monthly completion',mo.pct+'%',mo.done+'/'+mo.total+' tasks (30d)')
+ +stat('✅ Weekly consistency',wkCons+'/7 days','days meeting the streak goal')+'</div>';
+ h+='<div class="grid g2"><div class="card">'
+ +'<div class="card-h"><h3>🕒 Study sessions</h3><span class="psmall">'+state.settings.schedule.length+' sessions/day</span></div>'
+ +state.settings.schedule.map(s=>'<div class="uprow"><span class="time-badge">'+fmtMin(s.start)+'–'+fmtMin(s.end)+'</span><span>'+esc(s.label)+'</span>'
+ +(s===si.cur?'<span class="now">NOW</span>':'')+'</div>').join('')
+ +'<div class="mut sm" style="margin-top:6px">Next: '+(si.next?fmtMin(si.next.start)+' · '+esc(si.next.label):'—')+'</div></div>'
+ +'<div class="card revdue"><div class="card-h"><h3>🔄 Due for Revision</h3>'
+ +(due.length?'<span class="psmall">'+due.length+' due</span>':'')+'</div>'
+ +(due.length?due.slice(0,6).map(revisionRow).join('')+(due.length>6?'<div class="empty"><a style="color:var(--acc);cursor:pointer" onclick="navigate(\'revision\')">View all '+due.length+' →</a></div>':'')
+   :'<div class="empty">Nothing due — you\u2019re on top of revisions 🎉</div>')+'</div></div>';
+ if(isSun)h+='<div class="card banner"><h3>📋 It\u2019s Sunday — Weekly Review time</h3>'
+ +'<div class="mut sm" style="margin:6px 0 10px">Open the Progress page for your weekly performance, strong/weak areas and next week\u2019s revision list.</div>'
+ +'<button class="btn primary" onclick="navigate(\'progress\')">Open Weekly Review</button></div>';
+ if(!state.meta.welcomed)h+='<div class="card banner"><h3>👋 How this tracker works</h3>'
+ +'<div class="mut sm" style="margin:6px 0 10px">1️⃣ Open <b>Today</b> and work through your session checklist · 2️⃣ Log DSA problems, aptitude scores & interview answers as you go · 3️⃣ Marking a topic <b>done</b> auto-schedules spaced revision (1 → 3 → 7 → 14 → 30 days) · 4️⃣ Mistakes become <b>weak topics</b> that reappear in future days · 5️⃣ Fill the <b>end-of-day review</b> to plan tomorrow. Your streak counts when ≥'+Math.round(state.settings.streakThreshold*100)+'% of the day is done.</div>'
+ +'<button class="btn primary" onclick="dismissWelcome()">Got it — let\u2019s go 🚀</button></div>';
+ return h;}
+function dismissWelcome(){state.meta.welcomed=true;save();render();}
+
+/* ---------- Today ---------- */
+let todayFilter={q:'',f:'all',subj:'all',pri:'all'};
+function viewToday(){const D=todayStr();const st=dayStats(D);
+ let h=pageHead('☀️ Today',longDate(D)+' · '+st.pct+'% complete');
+ h+='<div class="card" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'
+ +'<div style="flex:1;min-width:200px"><div class="psmall">Progress: '+st.done+' / '+st.total+' ('+st.pct+'%)</div>'
+ +'<div class="pbar"><i style="width:'+st.pct+'%"></i></div></div>'
+ +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+ +'<button class="btn sm" onclick="openTaskModal(null,\'\')">＋ Add task</button>'
+ +'<button class="btn sm ghost" onclick="regenerateDay()">🔄 Regenerate</button>'
+ +'<button class="btn sm ghost" onclick="navigate(\'revision\')">📝 End-of-day review</button></div></div>';
+ h+='<div class="card filterbar"><input id="tf-q" class="in" placeholder="🔍 Search tasks (title / notes)…" value="'+esc(todayFilter.q)+'" oninput="onTodaySearch(this.value)">'
+ +'<div class="chips-row">'+[['all','All'],['pending','Pending'],['completed','Completed'],['due','Due Today'],['weak','Weak Topics']]
+  .map(([k,l])=>'<button class="fchip'+(todayFilter.f===k?' on':'')+'" onclick="setTodayFilter(\''+k+'\')">'+l+'</button>').join('')+'</div>'
+ +'<div class="row2"><select class="in" onchange="todayFilter.subj=this.value;render()">'
+ +'<option value="all">All subjects</option>'
+ +Object.entries(SUBJECTS).map(([k,v])=>'<option value="'+k+'"'+(todayFilter.subj===k?' selected':'')+'>'+v.name+'</option>').join('')
+ +'<option value="other"'+(todayFilter.subj==='other'?' selected':'')+'>Other</option></select>'
+ +'<select class="in" onchange="todayFilter.pri=this.value;render()">'
+ +[['all','All priorities'],['high','🔴 High'],['med','🟡 Medium'],['low','🟢 Low']]
+  .map(([k,l])=>'<option value="'+k+'"'+(todayFilter.pri===k?' selected':'')+'>'+l+'</option>').join('')+'</select></div></div>';
+ h+='<div id="taskArea">'+taskAreaHTML()+'</div>';
+ return h;}
+function setTodayFilter(k){todayFilter.f=k;render();}
+function onTodaySearch(v){todayFilter.q=v;const el=$('#taskArea');if(el)el.innerHTML=taskAreaHTML();}
+function taskAreaHTML(){const D=todayStr();const day=getDay(D);const f=todayFilter;
+ const q=f.q.toLowerCase();const weakSubs=weakSubjects();
+ const match=t=>{
+  if(q&&!(t.title.toLowerCase().includes(q)||(t.notes||'').toLowerCase().includes(q)))return false;
+  if(f.subj!=='all'&&(t.subject||'other')!==f.subj)return false;
+  if(f.pri!=='all'&&(t.priority||'med')!==f.pri)return false;
+  if(f.f==='pending'&&t.status==='done')return false;
+  if(f.f==='completed'&&t.status!=='done')return false;
+  if(f.f==='weak'&&t.type!=='weak'&&!weakSubs.includes(t.subject))return false;
+  return true;};
+ const filtering=q||f.f!=='all'||f.subj!=='all'||f.pri!=='all';
+ let h='';
+ if(f.f==='all'||f.f==='pending'||f.f==='due'){
+  let due=dueRevisions();
+  if(q)due=due.filter(r=>r.topic.toLowerCase().includes(q));
+  if(f.subj!=='all')due=due.filter(r=>r.subject===f.subj);
+  if(due.length)h+='<div class="card revdue"><div class="sess-head"><span class="sess-label">🔄 Due for Revision</span>'
+  +'<span class="sess-count">'+due.length+'</span></div>'+due.map(revisionRow).join('')+'</div>';}
+ state.settings.schedule.forEach(s=>{
+  const ts=day.tasks.filter(t=>t.session===s.id&&match(t));
+  if(filtering&&!ts.length)return;
+  h+=sessionCard(s,ts);});
+ const other=day.tasks.filter(t=>!t.session&&match(t));
+ if(other.length||!filtering)h+=sessionCard({id:'',label:'Other tasks',start:null},other,true);
+ if(filtering&&!h)h='<div class="card"><div class="empty">No tasks match this filter.</div></div>';
+ return h;}
+function regenerateDay(){if(!confirm('Regenerate today\u2019s checklist?\n\nCompletions & custom tasks for today will be reset. Logs, notes and review answers are kept.'))return;
+ const day=getDay(todayStr());day.tasks=generateDayTasks(todayStr());
+ save();render();toast('✅ Today\u2019s checklist regenerated');}
+
+/* ---------- DSA ---------- */
+function viewDSA(){const D=todayStr();const day=getDay(D);
+ const tasks=day.tasks.filter(t=>t.subject==='dsa');
+ const probs=state.dsaProblems;
+ const solved=probs.filter(p=>p.status==='Solved'||p.status==='Revised').length;
+ const avgT=probs.length?Math.round(probs.reduce((a,p)=>a+(+p.time||0),0)/probs.length):0;
+ const dueRe=state.revisionQueue.filter(q=>!q.done&&q.subject==='dsa'&&dayNum(q.dueDate)<=dayNum(D)).length;
+ const pr=subjectProgress(SUBJECTS.dsa);
+ const weakMap={};probs.forEach(p=>{if(p.mistake||!p.understood||p.status==='Stuck'){const k=p.topic||'General';weakMap[k]=(weakMap[k]||0)+1;}});
+ const weakList=Object.entries(weakMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ let h=pageHead('🧩 DSA','Concepts · daily practice · problem history · weak-topic detection');
+ h+='<div class="grid g4 stat-row">'+stat('Total problems logged',probs.length)
+ +stat('Solved / Revised',solved)+stat('Avg time per problem',avgT+'m')
+ +stat('Concepts covered',pr.done+'/'+pr.total,pr.pct+'%')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s DSA tasks</h3>'
+ +'<span class="psmall">'+tasks.filter(t=>t.status==='done').length+'/'+tasks.length+'</span></div>'
+ +'<button class="btn primary sm" onclick="openProblemModal()">➕ Log a problem</button>'
+ +'<div style="margin-top:8px">'+(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No DSA tasks today.</div>')+'</div></div>';
+ h+='<div class="card"><div class="card-h"><h3>🧠 Concepts</h3><span class="psmall">'+pr.pct+'% mastered · click = not started → in progress → done</span></div>'
+ +'<div class="pbar slim"><i style="width:'+pr.pct+'%"></i></div>'
+ +'<div class="topics-grid">'+SUBJECTS.dsa.lists[0].topics.map((t,i)=>topicRow('dsa','c',i,t)).join('')+'</div></div>';
+ h+='<div class="card"><div class="card-h"><h3>🗒 Problem History</h3>'
+ +'<span class="psmall">'+(probs.length?dueRe+' due for revisit':'—')+'</span></div>'
+ +'<div class="row2"><input id="ph-q" class="in" placeholder="🔍 Search problems…" oninput="filterProblems()">'
+ +'<div class="row2"><select id="ph-diff" class="in" onchange="filterProblems()">'
+ +['all','Easy','Medium','Hard'].map(d=>'<option value="'+d+'">'+(d==='all'?'All difficulty':d)+'</option>').join('')
+ +'</select><select id="ph-st" class="in" onchange="filterProblems()">'
+ +['all','Solved','Attempted','Stuck','Revised'].map(s=>'<option value="'+s+'">'+(s==='all'?'All status':s)+'</option>').join('')+'</select></div></div>'
+ +'<div id="ph-body">'+problemTable()+'</div></div>';
+ if(weakList.length)h+='<div class="card"><div class="card-h"><h3>⚠ Weakest problem topics</h3></div>'
+ +weakList.map(([t,n])=>'<div class="uprow"><span class="chip weak">'+esc(t)+'</span><span class="mut sm">'+n+' problem(s) with mistakes / not fully understood</span></div>').join('')+'</div>';
+ return h;}
+
+/* ---------- Java / AWS ---------- */
+function subjectPage(subj,subtitle){const D=todayStr();const day=getDay(D);
+ const tasks=day.tasks.filter(t=>t.subject===subj.id);
+ let h=pageHead(subj.name,subtitle);
+ const stats=subj.lists.map(l=>{let done=0;l.topics.forEach((_,i)=>{
+  if(((state.topicStatus[subj.id+':'+l.id+':'+i]||{}).status||'todo')==='done')done++;});
+  return[l.name,done,l.topics.length];});
+ h+='<div class="grid '+(subj.lists.length>2?'g3':'g'+Math.min(subj.lists.length,2))+' stat-row">'
+ +stats.map(([n,d,t])=>stat(n,d+'/'+t,t?Math.round(d/t*100)+'%':'—')).join('')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s '+subj.name+' tasks</h3>'
+ +'<span class="psmall">'+tasks.filter(t=>t.status==='done').length+'/'+tasks.length+'</span></div>'
+ +(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No tasks today.</div>')+'</div>';
+ h+=subj.lists.map(l=>listCard(subj,l)).join('');
+ return h;}
+function viewJava(){return subjectPage(SUBJECTS.java,'Core Java · OOP · Spring Boot / REST · interview practice');}
+function viewAWS(){return subjectPage(SUBJECTS.aws,'AWS services & concepts · architecture practice');}
+
+/* ---------- Aptitude ---------- */
+function viewAptitude(){const D=todayStr();const day=getDay(D);
+ const a=day.aptitude||{quant:{att:0,cor:0,time:0},logical:{att:0,cor:0,time:0},verbal:{att:0,cor:0,time:0},weak:''};
+ const tasks=day.tasks.filter(t=>t.subject==='aptitude');
+ const agg={quant:{att:0,cor:0},logical:{att:0,cor:0},verbal:{att:0,cor:0}};
+ Object.values(state.days).forEach(d=>{if(d.aptitude)APT_CATS.forEach(([k])=>{
+  agg[k].att+=(d.aptitude[k]&&d.aptitude[k].att)||0;agg[k].cor+=(d.aptitude[k]&&d.aptitude[k].cor)||0;});});
+ const totalA=agg.quant.att+agg.logical.att+agg.verbal.att;
+ const weak=state.weakTopics.filter(w=>!w.resolved&&w.subject==='aptitude');
+ let h=pageHead('🧮 Aptitude','Quant · Logical · Verbal · accuracy tracking');
+ h+='<div class="grid g4 stat-row">'+stat('Questions attempted (all time)',totalA)
+ +stat('Correct',agg.quant.cor+agg.logical.cor+agg.verbal.cor)
+ +stat('Overall accuracy',(totalA?Math.round((agg.quant.cor+agg.logical.cor+agg.verbal.cor)/totalA*100):0)+'%')
+ +stat('Weak aptitude topics',weak.length)+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>📝 Today\u2019s log</h3><span class="psmall">fill after your practice session</span></div>'
+ +APT_CATS.map(([k,nm])=>'<div class="row3" style="margin-bottom:8px"><div class="psmall" style="flex-basis:100%">'+nm+'</div>'
+ +'<div class="f"><label>Attempted</label><input type="number" min="0" id="ap-'+k+'-att" class="in" value="'+(a[k].att||0)+'"></div>'
+ +'<div class="f"><label>Correct</label><input type="number" min="0" id="ap-'+k+'-cor" class="in" value="'+(a[k].cor||0)+'"></div>'
+ +'<div class="f"><label>Time (min)</label><input type="number" min="0" id="ap-'+k+'-time" class="in" value="'+(a[k].time||0)+'"></div></div>').join('')
+ +'<div class="f"><label>Weak topic noticed today (e.g., Time & Work, Syllogism…)</label><input id="ap-weak" class="in" value="'+esc(a.weak||'')+'"></div>'
+ +'<button class="btn primary" onclick="saveAptitude()">Save today\u2019s log</button>'
+ +'<div class="mut sm" style="margin-top:8px">Accuracy below 60% (with 5+ attempts) or a noted weak topic is automatically flagged and brought back into future days.</div></div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s targets</h3><span class="psmall">'
+ +tasks.filter(t=>t.status==='done').length+'/'+tasks.length+' done</span></div>'
+ +(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No tasks today.</div>')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>📈 Accuracy by category (all time)</h3></div>'
+ +APT_CATS.map(([k,nm])=>{const pct=agg[k].att?Math.round(agg[k].cor/agg[k].att*100):0;
+  return '<div class="accrow"><span style="width:130px">'+nm+'</span><div class="pbar slim"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b><span class="mut sm">'+agg[k].cor+'/'+agg[k].att+'</span></div>';}).join('')+'</div>';
+ h+=SUBJECTS.aptitude.lists.map(l=>listCard(SUBJECTS.aptitude,l)).join('');
+ if(weak.length)h+='<div class="card"><div class="card-h"><h3>⚠ Weak aptitude topics</h3></div>'
+ +weak.map(w=>'<div class="uprow"><span class="chip weak">'+esc(w.topic)+'</span><span class="mut sm">'+esc(w.reason||'')+'</span></div>').join('')
+ +'<div class="mut sm" style="margin-top:6px">Resolve them from the Revision page once you\u2019re confident.</div></div>';
+ return h;}
+
+/* ---------- Core CS ---------- */
+const CORE=['sql','os','networks','linux','se','testing','git','sysdesign'];
+function viewCoreCS(sub){const sid=CORE.includes(sub)?sub:'sql';const subj=SUBJECTS[sid];
+ const D=todayStr();const day=getDay(D);
+ const tasks=day.tasks.filter(t=>t.subject===sid);
+ let h=pageHead('🖥️ Core CS','SQL/DBMS · OS · Networks · Linux · SE · Testing · Git · System Design');
+ h+='<div class="tabbar">'+CORE.map(c=>'<button class="tab'+(c===sid?' on':'')+'" onclick="navigate(\'corecs\',\''+c+'\')">'+SUBJECTS[c].name+'</button>').join('')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s '+subj.name+' tasks</h3>'
+ +'<span class="psmall">'+tasks.filter(t=>t.status==='done').length+'/'+tasks.length+'</span></div>'
+ +(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No tasks today.</div>')+'</div>';
+ h+=subj.lists.map(l=>listCard(subj,l)).join('');
+ return h;}
+
+/* ---------- Projects ---------- */
+function viewProjects(){const D=todayStr();const day=getDay(D);
+ const tasks=day.tasks.filter(t=>t.subject==='projects');
+ const projAns=state.interviewLog.filter(l=>l.cat==='project').length;
+ let h=pageHead('💼 Projects','Interview-ready project preparation');
+ h+='<div class="grid g3 stat-row">'+stat('Projects',state.projects.length)
+ +stat('Project answers saved',projAns)+stat('Project tasks today',tasks.filter(t=>t.status==='done').length+'/'+tasks.length)+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s project practice</h3></div>'
+ +'<button class="btn primary sm" onclick="openProjectMode()">💼 Project Interview Mode</button>'
+ +'<div style="margin-top:8px">'+(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No tasks today.</div>')+'</div></div>';
+ h+='<div class="card"><div class="card-h"><h3>My projects</h3>'
+ +'<button class="btn primary sm" onclick="openProjectModal()">＋ Add project</button></div>'
+ +(state.projects.length?state.projects.map(p=>'<div class="card" style="margin:8px 0;background:#f8fafc">'
+  +'<div class="card-h"><h3>💼 '+esc(p.name)+'</h3><div style="display:flex;gap:6px">'
+  +'<button class="btn sm primary" onclick="openProjectMode()">Interview Mode</button>'
+  +'<button class="btn sm ghost" onclick="openProjectModal(\''+p.id+'\')">Edit</button></div></div>'
+  +'<div class="proj-grid">'+PROJECT_FIELDS.filter(([k])=>p[k]).map(([k,lab])=>'<div class="kv"><b>'+lab+'</b>'+esc(p[k])+'</div>').join('')+'</div></div>').join('')
+  :'<div class="empty">No projects yet — add your projects with their architecture, challenges, bugs and fixes so you\u2019re ready for project rounds.</div>')+'</div>';
+ return h;}
+
+/* ---------- Interview ---------- */
+function viewInterview(){const D=todayStr();const day=getDay(D);
+ const items=day.interview||[];const tg=state.settings.dailyTargets;
+ const tasks=day.tasks.filter(t=>t.subject==='interview');
+ const tech=items.filter(i=>TECH_CATS.includes(i.cat)),proj=items.filter(i=>i.cat==='project'),hr=items.filter(i=>i.cat==='hr');
+ const done=a=>a.filter(i=>i.status!=='todo').length;
+ const week=weekDates();const wkAns=state.interviewLog.filter(l=>week.includes(l.date)).length;
+ let h=pageHead('🎤 Interview','Rotating daily questions · must-know topics · answer practice');
+ h+='<div class="grid g4 stat-row">'+stat('Answered all time',state.interviewLog.filter(l=>l.result==='good').length)
+ +stat('Answered this week',wkAns)+stat('Missed (weak)',state.interviewLog.filter(l=>l.result==='fail').length)
+ +stat('Today\u2019s target',(done(tech)+done(proj)+done(hr))+'/'+items.length)+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s targets</h3><span class="psmall">'
+ +tasks.filter(t=>t.status==='done').length+'/'+tasks.length+' done — logging answers auto-checks these</span></div>'
+ +(tasks.length?tasks.map(taskRow).join(''):'')+'</div>';
+ const group=(title,arr,color)=>{if(!arr.length)return '';
+  return '<div class="card"><div class="card-h"><h3>'+title+'</h3><span class="psmall">'+done(arr)+'/'+arr.length+' done</span></div>'
+  +arr.map(it=>{const st=it.status;
+   return '<div class="iq '+(st==='good'?'good':st==='fail'?'fail':'')+'">'
+   +'<div class="tt">'+esc(it.text)+'</div>'
+   +'<div class="iq-m"><span class="chip" style="background:'+color+'1a;color:'+color+'">'+(CAT_NAME[it.cat]||'')+'</span>'
+   +(st==='good'?'<span class="chip ok">answered ✓</span>':st==='fail'?'<span class="chip bad">missed — queued for revision</span>':'')+'</div>'
+   +'<div class="iq-a">'+(st==='todo'
+    ?'<button class="btn sm primary" onclick="openAnswer(\''+it.id+'\')">Answer</button><button class="btn sm warn" onclick="markInterviewDirect(\''+it.id+'\')">Couldn\u2019t answer</button>'
+    :'<button class="btn sm ghost" onclick="openAnswer(\''+it.id+'\')">View / edit answer</button>')+'</div></div>';}).join('')
+  +'</div>';};
+ h+=group('🧑‍💻 Technical questions ('+tg.techQ+')',tech,'#ef4444');
+ h+=group('💼 Project questions ('+tg.projectQ+')',proj,'#14b8a6');
+ h+=group('🤝 HR / Behavioral questions ('+tg.hrQ+')',hr,'#a855f7');
+ h+='<div class="mut sm" style="margin-bottom:14px">Questions rotate automatically — the same question won\u2019t repeat until its whole pool is exhausted. “Couldn\u2019t answer” adds it to weak topics + tomorrow\u2019s revision.</div>';
+ h+='<div class="card"><div class="card-h"><h3>⭐ Interview Must Know</h3><span class="psmall">'
+ +Object.values(state.mustKnow).filter(v=>v.status==='done').length+'/'+MUST_KNOW.length+'</span></div>'
+ +'<div class="topics-grid">'+MUST_KNOW.map((m,i)=>{const st=(state.mustKnow[i]||{}).status||'todo';
+  return '<div class="task '+st+'"><button class="cb '+st+'" onclick="cycleMust('+i+')">'+(st==='done'?'✓':st==='prog'?'✎':'')+'</button>'
+  +'<div class="tbody"><div class="tt">'+esc(m)+'</div></div></div>';}).join('')+'</div></div>';
+ const recent=[...state.interviewLog].reverse().slice(0,8);
+ if(recent.length)h+='<div class="card"><div class="card-h"><h3>🕘 Recent answers</h3></div>'
+ +recent.map(l=>'<div class="uprow"><span class="chip '+(l.result==='good'?'ok':'bad')+'">'+(CAT_NAME[l.cat]||'')+'</span>'
+ +'<span class="mut sm">'+niceDate(l.date)+'</span><span style="flex:1;min-width:180px">'+esc(l.text.length>70?l.text.slice(0,70)+'…':l.text)+'</span>'
+ +'<button class="ibtn" onclick="openLogView(\''+l.id+'\')">👁</button></div>').join('')+'</div>';
+ return h;}
+
+/* ---------- Communication ---------- */
+function viewCommunication(){const D=todayStr();const day=getDay(D);
+ const tasks=day.tasks.filter(t=>t.subject==='communication');
+ if(!smQ)smQ=nextQ('comm');
+ const todayAns=state.commAnswers.filter(c=>c.date===D).length;
+ const recent=[...state.commAnswers].reverse().slice(0,5);
+ let h=pageHead('💬 Communication','Daily speaking practice · HR & behavioral prep');
+ h+='<div class="grid g3 stat-row">'+stat('Answers practiced today',todayAns)
+ +stat('Answers practiced (all time)',state.commAnswers.length)
+ +stat('Today\u2019s checklist',tasks.filter(t=>t.status==='done').length+'/'+tasks.length)+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎯 Today\u2019s communication practice</h3></div>'
+ +(tasks.length?tasks.map(taskRow).join(''):'<div class="empty">No tasks today.</div>')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>🎤 Interview Speaking Mode</h3>'
+ +'<button class="btn sm ghost" onclick="newCommQ()">🎲 New question</button></div>'
+ +'<div class="qtext" id="sm-q">'+esc(smQ)+'</div>'
+ +'<div class="f"><label>Type your answer the way you would say it — then say it out loud</label>'
+ +'<textarea id="sm-text" class="in" rows="6" placeholder="Your answer…">'+esc(smDraft)+'</textarea></div>'
+ +'<button class="btn primary" onclick="saveCommAnswer()">💾 Save &amp; mark practiced</button></div>';
+ if(recent.length)h+='<div class="card"><div class="card-h"><h3>🕘 Recent answers</h3></div>'
+ +recent.map(c=>'<div class="uprow"><span class="mut sm">'+niceDate(c.date)+'</span>'
+ +'<span style="flex:1;min-width:180px">'+esc(c.q.length>70?c.q.slice(0,70)+'…':c.q)+'</span>'
+ +'<button class="ibtn" onclick="openCommView(\''+c.id+'\')">👁</button></div>').join('')+'</div>';
+ return h;}
+
+/* ---------- Revision ---------- */
+function viewRevision(){const D=todayStr();const day=getDay(D);
+ const rv=ensureReview(D);
+ const due=dueRevisions();const t=dayNum(D);
+ const upcoming=state.revisionQueue.filter(q=>!q.done&&dayNum(q.dueDate)>t)
+  .sort((a,b)=>a.dueDate<b.dueDate?-1:1).slice(0,12);
+ const weak=state.weakTopics.filter(w=>!w.resolved);
+ let h=pageHead('🔁 Revision','Spaced revision · weak topics · end-of-day review');
+ h+='<div class="card revdue"><div class="card-h"><h3>🔄 Due for Revision</h3><span class="psmall">'
+ +(due.length?due.length+' item'+(due.length>1?'s':''):'all clear')+'</span></div>'
+ +(due.length?due.map(revisionRow).join(''):'<div class="empty">Nothing due — you\u2019re fully caught up 🎉</div>')+'</div>';
+ if(upcoming.length)h+='<div class="card"><div class="card-h"><h3>📅 Upcoming revisions</h3></div>'
+ +upcoming.map(q=>'<div class="uprow"><span class="chip">'+niceDate(q.dueDate)+'</span><span>'
+ +esc(q.topic)+'</span><span class="mut sm">rev '+(q.stage+1)+'/5 · '+(SUBJECTS[q.subject]?SUBJECTS[q.subject].name:'')+'</span></div>').join('')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>⚠ Weak Topics</h3><span class="psmall">'+weak.length+' open</span></div>'
+ +(weak.length?weak.map(w=>{const subj=SUBJECTS[w.subject];
+  return '<div class="task"><div class="tbody"><div class="tt">⚠ '+esc(w.topic)+'</div>'
+  +'<div class="tmeta">'+(subj?chip(subj):'')+'<span class="mut sm">'+esc(w.reason||'')+' · practiced '+(w.hits||0)+'×</span></div></div>'
+  +'<div class="tacts"><button class="ibtn" title="Mark resolved" onclick="resolveWeak(\''+w.id+'\')">✓</button></div></div>';}).join('')
+  :'<div class="empty">No weak topics — nice! 🎉</div>')
+ +'<div class="row2" style="margin-top:10px"><select id="wk-subj" class="in">'
+ +Object.entries(SUBJECTS).map(([k,v])=>'<option value="'+k+'">'+v.name+'</option>').join('')
+ +'</select><div class="row2"><input id="wk-topic" class="in" placeholder="Add a weak topic manually…">'
+ +'<button class="btn" onclick="addWeakManual()">Add</button></div></div>'
+ +'<div class="mut sm" style="margin-top:8px">Open weak topics automatically reappear in your daily checklist (as “Focus (weak): …”) until resolved.</div></div>';
+ h+='<div class="card"><div class="card-h"><h3>📝 End-of-day review</h3><span class="psmall">'
+ +rv.checks.filter(Boolean).length+'/'+REVIEW_QS.length+' reflected</span></div>'
+ +REVIEW_QS.map((q,i)=>'<div class="task '+(rv.checks[i]?'done':'')+'">'
+ +'<button class="cb '+(rv.checks[i]?'done':'')+'" onclick="toggleReviewCheck('+i+')">'+(rv.checks[i]?'✓':'')+'</button>'
+ +'<div class="tbody"><div class="tt">'+esc(q)+'</div></div></div>').join('')
+ +'<div class="f" style="margin-top:12px"><label>What did I learn today</label><textarea id="rv-learned" class="in" rows="2">'+esc(rv.learned||'')+'</textarea></div>'
+ +'<div class="f"><label>Today\u2019s Mistakes / Weak Areas (each line becomes a weak topic)</label><textarea id="rv-mistakes" class="in" rows="3">'+esc(rv.mistakes||'')+'</textarea></div>'
+ +'<div class="f"><label>Tomorrow\u2019s Priority (each line becomes a ⭐ task for tomorrow)</label><textarea id="rv-tomorrow" class="in" rows="3">'+esc(rv.tomorrow||'')+'</textarea></div>'
+ +'<button class="btn primary" onclick="saveReview()">💾 Save review</button></div>';
+ h+='<div class="card"><h3>🧠 How spaced revision works</h3><div class="mut sm" style="margin-top:6px">'
+ +'Whenever you complete a topic, it is automatically scheduled for revision after <b>1 → 3 → 7 → 14 → 30 days</b>. '
+ +'Each time you tick it off here, the next revision is scheduled. Finish all 5 and the topic is marked mastered. '
+ +'Overdue items stay visible until you complete them.</div></div>';
+ return h;}
+
+/* ---------- Progress ---------- */
+function viewProgress(){const D=todayStr();const wr=weeklyReview();const isSun=new Date().getDay()===0;
+ const mo=periodCompletion(30);const cs=currentStreak(),bs=bestStreak();
+ const wkCons=weekDates().filter(qualifiesDay).length;
+ let h=pageHead('📈 Progress','Daily · weekly · monthly · subject mastery');
+ if(isSun)h+='<div class="card banner"><h3>📋 Sunday Weekly Review</h3><div class="mut sm" style="margin-top:4px">Your week at a glance is right below 👇</div></div>';
+ h+='<div class="grid g4 stat-row">'+stat('🔥 Current streak',cs+' day'+(cs===1?'':'s'))
+ +stat('🏆 Best streak',bs+' days')+stat('✅ Weekly consistency',wkCons+'/7 days')
+ +stat('🗓 Monthly completion',mo.pct+'%')+'</div>';
+ h+='<div class="card"><div class="card-h"><h3>📅 Weekly Performance</h3>'
+ +'<span class="psmall">'+niceDate(weekDates()[0])+' – '+niceDate(weekDates()[6])+'</span></div>'
+ +'<div class="grid g4 stat-row" style="margin:0 0 12px">'
+ +stat('Tasks completed',wr.tasksDone,'of '+wr.tasksTotal)
+ +stat('DSA problems solved',wr.probs)
+ +stat('Aptitude questions',wr.aptA,(wr.aptA?Math.round(wr.aptC/wr.aptA*100):0)+'% accuracy')
+ +stat('Interview Qs answered',wr.iqs)
+ +stat('Communication sessions',wr.comm)
+ +stat('Revisions completed',wr.revs)
+ +stat('Topics mastered',wr.topics)
+ +stat('Study time',fmtSec(wr.studySec))+'</div>'
+ +'<div class="grid g3">'
+ +'<div><b style="font-size:13px">💪 Strong areas</b>'
+ +(wr.strong.length?wr.strong.map(s=>'<div class="uprow"><span class="chip ok">'+esc(s)+'</span></div>').join(''):'<div class="empty">Complete 3+ tasks consistently in a subject to see it here.</div>')+'</div>'
+ +'<div><b style="font-size:13px">⚠ Weak areas</b>'
+ +(wr.weak.length?wr.weak.map(s=>'<div class="uprow"><span class="chip bad">'+esc(s)+'</span></div>').join(''):'<div class="empty">None this week 👍</div>')+'</div>'
+ +'<div><b style="font-size:13px">🔁 Topics to revise next week</b>'
+ +(wr.nextWeek.length?wr.nextWeek.map(s=>'<div class="uprow" style="font-size:13px">• '+esc(s)+'</div>').join(''):'<div class="empty">Nothing pending.</div>')+'</div></div></div>';
+ h+='<div class="card"><div class="card-h"><h3>🔥 Last 30 days</h3><span class="psmall">darker = higher completion</span></div>'
+ +'<div class="hm">'+lastNDays(30).map(dd=>{const st=dayStats(dd);
+  const op=st.total?0.15+0.85*st.done/st.total:0.05;
+  return '<div class="hmc" style="background:rgba(79,70,229,'+op.toFixed(2)+')" title="'+dd+': '+st.done+'/'+st.total+' ('+st.pct+'%)"></div>';}).join('')+'</div>'
+ +'<div class="tblwrap" style="margin-top:14px"><table><thead><tr><th>Day</th><th>Completed</th><th>%</th><th></th></tr></thead><tbody>'
+ +lastNDays(7).map(dd=>{const st=dayStats(dd);
+  return '<tr><td>'+niceDate(dd)+(dd===D?' <span class="chip pri">today</span>':'')+'</td><td>'+st.done+'/'+st.total+'</td><td>'+st.pct+'%</td>'
+  +'<td><div class="pbar slim" style="width:90px;margin:0"><i style="width:'+st.pct+'%"></i></div></td></tr>';}).join('')
+ +'</tbody></table></div></div>';
+ h+='<div class="card"><div class="card-h"><h3>📚 Subject mastery</h3></div>'
+ +Object.values(SUBJECTS).filter(s=>s.lists&&s.lists.length).map(s=>{const p=subjectProgress(s);
+  return '<div class="accrow"><span style="width:150px">'+s.name+'</span><div class="pbar slim"><i style="width:'+p.pct+'%"></i></div><b>'+p.pct+'%</b><span class="mut sm">'+p.done+'/'+p.total+'</span></div>';}).join('')+'</div>';
+ const probs=state.dsaProblems;
+ h+='<div class="card"><div class="card-h"><h3>🧩 DSA snapshot</h3></div>'
+ +['Easy','Medium','Hard'].map(d=>{const n=probs.filter(p=>p.diff===d&&(p.status==='Solved'||p.status==='Revised')).length;
+  const tot=probs.filter(p=>p.diff===d).length||1;
+  return '<div class="accrow"><span style="width:150px">'+d+' solved</span><div class="pbar slim"><i style="width:'+Math.round(n/tot*100)+'%"></i></div><b>'+n+'</b></div>';}).join('')+'</div>';
+ return h;}
+
+/* ---------- Settings ---------- */
+let schedDraft=null;
+function viewSettings(){if(!schedDraft)schedDraft=JSON.parse(JSON.stringify(state.settings.schedule));
+ const s=state.settings,tg=s.dailyTargets;
+ let h=pageHead('⚙️ Settings','Schedule · targets · data');
+ h+='<div class="card"><h3>👤 Profile &amp; daily targets</h3>'
+ +'<div class="row2" style="margin-top:10px"><div class="f"><label>Your name</label><input id="st-name" class="in" value="'+esc(s.name)+'"></div>'
+ +'<div class="f"><label>Streak goal — day counts if completion is at least</label><select id="st-threshold" class="in">'
+ +[[0.4,'40%'],[0.5,'50%'],[0.6,'60%'],[0.7,'70%'],[0.8,'80%']].map(([v,l])=>'<option value="'+v+'"'+(s.streakThreshold===v?' selected':'')+'>'+l+' of tasks</option>').join('')+'</select></div></div>'
+ +'<div class="row3" style="margin-top:10px">'
+ +[['st-easy','Easy problems',tg.easy],['st-medium','Medium problems',tg.medium],['st-quant','Quant questions',tg.quant],
+  ['st-logical','Logical questions',tg.logical],['st-verbal','Verbal questions',tg.verbal],['st-sqlq','SQL questions',tg.sqlQ],
+  ['st-tech','Technical interview Qs',tg.techQ],['st-projq','Project interview Qs',tg.projectQ],['st-hrq','HR questions',tg.hrQ]]
+  .map(([id,lab,v])=>'<div class="f"><label>'+lab+'</label><input type="number" min="0" id="'+id+'" class="in" value="'+v+'"></div>').join('')+'</div>'
+ +'<button class="btn primary" style="margin-top:12px" onclick="saveSettings()">💾 Save profile &amp; targets</button>'
+ +'<div class="mut sm" style="margin-top:8px">Targets apply to newly generated days (use “Regenerate” on Today to apply immediately).</div></div>';
+ h+='<div class="card"><div class="card-h"><h3>🕒 Daily schedule</h3><div><button class="btn sm ghost" onclick="draftAddSess()">＋ Add session</button>'
+ +'<button class="btn sm ghost" onclick="discardSchedule()">Discard changes</button>'
+ +'<button class="btn sm primary" onclick="saveSchedule()">💾 Save schedule</button></div></div>'
+ +'<div class="mut sm" style="margin-bottom:10px">Tip: end time 00:00 means midnight (12:00 AM). Click subject chips to include/exclude subjects in each session.</div>'
+ +schedDraft.map(sess=>'<div class="sess-edit" data-id="'+sess.id+'">'
+  +'<div class="row3"><div class="f"><label>Label</label><input class="in s-label" value="'+esc(sess.label)+'"></div>'
+  +'<div class="f"><label>Start</label><input type="time" class="in s-start" value="'+minToInput(sess.start)+'"></div>'
+  +'<div class="f"><label>End</label><input type="time" class="in s-end" value="'+minToInput(sess.end)+'"></div></div>'
+  +'<div class="chips-row">'+Object.entries(SUBJECTS).map(([k,v])=>'<button type="button" class="sub-chip'+((sess.subjects||[]).includes(k)?' on':'')+'" style="--c:'+v.color+'" onclick="this.classList.toggle(\'on\')">'+v.name+'</button>').join('')+'</div>'
+  +'<button class="btn sm danger" style="margin-top:10px" onclick="draftDelSess(\''+sess.id+'\')">Remove session</button></div>').join('')+'</div>';
+ h+='<div class="card"><h3>💾 Data</h3><div class="mut sm" style="margin:6px 0 12px">All data is stored locally in this browser (localStorage). Export a backup regularly or use it to move to another device.</div>'
+ +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="exportData()">⬇ Export backup (JSON)</button>'
+ +'<label class="btn" style="cursor:pointer">⬆ Import backup<input type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></label>'
+ +'<button class="btn danger" onclick="resetAll()">🗑 Reset all data</button></div></div>';
+ h+='<div class="card"><h3>ℹ️ About</h3><div class="mut sm" style="margin-top:6px">InterviewPrep — a personal interview revision tracker built around '
+ +'<b>Learn → Revise → Practice → Solve → Track → Improve</b>. Single-file app · works offline · no account needed.</div></div>';
+ return h;}
+function saveSettings(){const s=state.settings;
+ s.name=$('#st-name').value.trim();
+ s.streakThreshold=parseFloat($('#st-threshold').value)||0.5;
+ s.dailyTargets={easy:+$('#st-easy').value||1,medium:+$('#st-medium').value||1,
+  quant:+$('#st-quant').value||15,logical:+$('#st-logical').value||10,verbal:+$('#st-verbal').value||10,
+  techQ:+$('#st-tech').value||5,projectQ:+$('#st-projq').value||2,hrQ:+$('#st-hrq').value||2,sqlQ:+$('#st-sqlq').value||3};
+ save();render();toast('⚙️ Settings saved');}
+function draftAddSess(){schedDraft.push({id:uid(),start:600,end:720,label:'New session',subjects:[]});render();}
+function draftDelSess(id){schedDraft=schedDraft.filter(s=>s.id!==id);render();}
+function discardSchedule(){schedDraft=null;render();}
+function saveSchedule(){const out=[];
+ $$('.sess-edit').forEach(r=>{const label=r.querySelector('.s-label').value.trim()||'Session';
+  let start=parseTime(r.querySelector('.s-start').value)||600;
+  let end=parseTime(r.querySelector('.s-end').value);if(end===0)end=1440;
+  if(end<=start){end=Math.min(1440,start+60);toast('⚠ A session was shorter than 1 hour — adjusted');}
+  const subjects=[...r.querySelectorAll('.sub-chip.on')].map(c=>c.textContent);
+  out.push({id:r.dataset.id||uid(),start:start,end:end,label:label,subjects:subjects});});
+ out.sort((a,b)=>a.start-b.start);
+ state.settings.schedule=out;schedDraft=null;save();render();
+ toast('🕒 Schedule saved — use “Regenerate” on Today to apply');}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download='interview-prep-backup-'+todayStr()+'.json';a.click();toast('⬇ Backup downloaded');}
+function importData(ev){const f=ev.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{try{const data=JSON.parse(r.result);
+  if(!data.days||!data.settings)throw 0;
+  state=data;save();toast('✅ Data imported');render();}
+  catch(e){toast('❌ Import failed — invalid file');}};
+ r.readAsText(f);}
+function resetAll(){if(!confirm('Delete ALL data? This cannot be undone.'))return;
+ if(!confirm('Really sure? Export a backup first if unsure.'))return;
+ localStorage.removeItem(KEY);state=defaultState();schedDraft=null;getDay(todayStr());render();toast('🗑 All data reset');}
+
+/* =====================================================================
+   15. ROUTER, HEADER, NAV, INIT
+===================================================================== */
+const VIEWS={dashboard:viewDashboard,today:viewToday,dsa:viewDSA,java:viewJava,aws:viewAWS,
+ aptitude:viewAptitude,corecs:viewCoreCS,projects:viewProjects,interview:viewInterview,
+ communication:viewCommunication,revision:viewRevision,progress:viewProgress,settings:viewSettings};
+let lastViewKey='';
+function currentView(){const parts=(location.hash||'').replace(/^#\/?/,'').split('/');
+ return{v:parts[0]||'today',sub:parts[1]||null};}
+function navigate(v,sub){$('#sidebar').classList.remove('open');$('#overlay').classList.remove('show');
+ const h='#/'+v+(sub?'/'+sub:'');
+ if(location.hash===h)render();else location.hash=h;}
+function toggleSidebar(){$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('show');}
+function captureTransient(){const v=currentView().v;
+ try{
+  if(v==='revision'&&$('#rv-learned'))captureReview();
+  if(v==='aptitude'&&$('#ap-quant-att'))captureAptitude();
+  if(v==='communication'&&$('#sm-text'))smDraft=$('#sm-text').value;
+ }catch(e){}}
+function render(){captureTransient();
+ const{v,sub}=currentView();const key=v+'/'+(sub||'');
+ $('#view').innerHTML=(VIEWS[v]||VIEWS.today)(sub);
+ renderHeader();renderNav();
+ if(key!==lastViewKey){window.scrollTo(0,0);lastViewKey=key;}}
+function renderHeader(){const{v}=currentView();
+ $('#topbar-title').innerHTML=((VIEW_META[v]||VIEW_META.today)[1])+' <span class="tb-date">'+niceDate(todayStr())+'</span>';
+ $('#tb-streak').innerHTML='🔥 '+currentStreak();
+ $('#tb-timer').innerHTML=(state.timer.running?'⏸ ':'▶ ')+fmtSec(studySecondsToday());}
+function renderNav(){const cur=currentView().v;
+ $('#nav').innerHTML=NAV.map(([v,ic,nm])=>'<a class="navitem'+(cur===v?' active':'')+'" onclick="navigate(\''+v+'\')">'+ic+'<span>'+nm+'</span></a>').join('');
+ $('#side-prog').innerHTML='Today: <b>'+dayStats(todayStr()).pct+'%</b> · 🔥 '+currentStreak()+'d · '+fmtSec(studySecondsToday());}
+window.addEventListener('hashchange',render);
+window.addEventListener('beforeunload',()=>{if(state.timer.running)flushTimer();save();});
+/* periodic refresh: clock/session line, timer-day rollover */
+setInterval(()=>{
+ if(state.timer.running&&state.timer.date&&state.timer.date!==todayStr()){flushTimer();state.timer.date=todayStr();save();}
+ const el=$('#now-line');if(el)el.innerHTML=nowLineHTML();
+ renderHeader();
+},60000);
+/* init */
+load();
+getDay(todayStr());
+if(!location.hash)location.hash='#/today';
+render();
+</script>
+</body>
+</html>
